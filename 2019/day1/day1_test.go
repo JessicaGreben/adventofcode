@@ -9,7 +9,7 @@ import (
 	"github.com/jessicagreben/adventofcode/2019/pkg/input"
 )
 
-func TestCalculateFuelPart1(t *testing.T) {
+func TestDay1Part1(t *testing.T) {
 	dir, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -42,7 +42,7 @@ func TestCalculateFuelPart1(t *testing.T) {
 	}
 }
 
-func TestCalculateFuelPart2(t *testing.T) {
+func TestDay1Part2(t *testing.T) {
 	dir, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
