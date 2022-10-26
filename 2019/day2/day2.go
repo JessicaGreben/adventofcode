@@ -5,20 +5,22 @@ import (
 	"fmt"
 )
 
+type opCode int
+
 const (
-	opcodeAdd       = 1
-	opcodeMultiply  = 2
-	opcodeTerminate = 99
+	opCodeAdd       opCode = 1
+	opCodeMultiply  opCode = 2
+	opCodeTerminate opCode = 99
 )
 
-var opcodeInstructionCount = map[int]int{
-	opcodeAdd:       4,
-	opcodeMultiply:  4,
-	opcodeTerminate: 1,
+var opCodeInstructionCount = map[opCode]int{
+	opCodeAdd:       4,
+	opCodeMultiply:  4,
+	opCodeTerminate: 1,
 }
 
 var (
-	errInvalidOpcode = errors.New("invalid opcode")
+	errInvalidOpCode = errors.New("invalid opCode")
 	errInvalidLen    = errors.New("invalid length")
 	errNounRange     = errors.New("noun out of [0,99] range")
 	errVerbRange     = errors.New("verb out of [0,99] range")
@@ -32,7 +34,7 @@ func Part1(input []int) (int, error) {
 	if err := restore(noun, verb, input); err != nil {
 		return -1, err
 	}
-	return IntcodeProgram(input)
+	return RunProgram(input)
 }
 
 func restore(noun, verb int, input []int) error {
@@ -51,28 +53,24 @@ func restore(noun, verb int, input []int) error {
 	return nil
 }
 
-func IntcodeProgram(input []int) (int, error) {
+func RunProgram(input []int) (int, error) {
 	var programCounter int
 	for programCounter < len(input) {
-		op := input[programCounter]
-		switch {
-		case op == opcodeAdd || op == opcodeMultiply:
+		switch op := opCode(input[programCounter]); op {
+		case opCodeAdd:
 			inputPtr1, inputPtr2, outputPtr := input[programCounter+1], input[programCounter+2], programCounter+3
 			value1, value2, dstIdx := input[inputPtr1], input[inputPtr2], input[outputPtr]
-			var out int
-			if op == opcodeAdd {
-				out = value1 + value2
-				programCounter += opcodeInstructionCount[opcodeAdd]
-			}
-			if op == opcodeMultiply {
-				out = value1 * value2
-				programCounter += opcodeInstructionCount[opcodeMultiply]
-			}
-			input[dstIdx] = out
-		case op == opcodeTerminate:
+			input[dstIdx] = value1 + value2
+			programCounter += opCodeInstructionCount[opCodeAdd]
+		case opCodeMultiply:
+			inputPtr1, inputPtr2, outputPtr := input[programCounter+1], input[programCounter+2], programCounter+3
+			value1, value2, dstIdx := input[inputPtr1], input[inputPtr2], input[outputPtr]
+			input[dstIdx] = value1 * value2
+			programCounter += opCodeInstructionCount[opCodeMultiply]
+		case opCodeTerminate:
 			return input[0], nil
 		default:
-			return -1, fmt.Errorf("%w: %d", errInvalidOpcode, op)
+			return -1, fmt.Errorf("%w: %d", errInvalidOpCode, op)
 		}
 	}
 	return input[0], nil
@@ -83,7 +81,7 @@ func Part2(input []int) (int, int, error) {
 		for verb := 0; verb < 100; verb++ {
 			cp := makeCopy(input)
 			restore(noun, verb, cp)
-			x, err := IntcodeProgram(cp)
+			x, err := RunProgram(cp)
 			if err != nil {
 				return -1, -1, err
 			}
@@ -96,7 +94,5 @@ func Part2(input []int) (int, int, error) {
 }
 
 func makeCopy(arr []int) []int {
-	cp := make([]int, len(arr))
-	copy(cp, arr)
-	return cp
+	return append([]int{}, arr...)
 }

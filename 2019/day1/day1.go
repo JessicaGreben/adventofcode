@@ -1,50 +1,30 @@
 package day1
 
-import (
-	"strconv"
-)
-
-func Part1(moduleMasses []string) (int, error) {
-	totalFuel, err := moduleFuelRequirements(moduleMasses)
-	if err != nil {
-		return -1, err
-	}
-	return totalFuel, nil
+func Part1(moduleMasses []int) int {
+	return moduleFuelRequirements(moduleMasses)
 }
 
-func moduleFuelRequirements(moduleMasses []string) (int, error) {
+func moduleFuelRequirements(moduleMasses []int) int {
 	fuelRequired := 0
 	for _, mass := range moduleMasses {
-		mass, err := strconv.Atoi(mass)
-		if err != nil {
-			return -1, err
-		}
 		fuelRequired += calculateModuleFuel(mass)
 	}
-	return fuelRequired, nil
+	return fuelRequired
 }
 
-func Part2(moduleMasses []string) (int, error) {
-	totalFuel, err := totalFuelRequirements(moduleMasses)
-	if err != nil {
-		return -1, err
-	}
-	return totalFuel, nil
+func Part2(moduleMasses []int) int {
+	return totalFuelRequirements(moduleMasses)
 }
 
-func totalFuelRequirements(moduleMasses []string) (int, error) {
+func totalFuelRequirements(moduleMasses []int) int {
 	fuelRequired := 0
 	for _, mass := range moduleMasses {
-		mass, err := strconv.Atoi(mass)
-		if err != nil {
-			return -1, err
-		}
 		moduleFuel := calculateModuleFuel(mass)
 		fuelRequired += moduleFuel
 		fuelRequired += calculateFuelFuel(moduleFuel)
 
 	}
-	return fuelRequired, nil
+	return fuelRequired
 }
 
 func calculateModuleFuel(mass int) int {

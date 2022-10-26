@@ -3,17 +3,22 @@ package input
 import (
 	"bufio"
 	"os"
+	"strconv"
 )
 
-func ReadFromFile(filepath string) ([]string, error) {
+func ReadFromFileToI(filepath string) ([]int, error) {
 	fd, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
 	}
 	scanner := bufio.NewScanner(fd)
-	input := []string{}
+	input := []int{}
 	for scanner.Scan() {
-		input = append(input, scanner.Text())
+		valueInt, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			return nil, err
+		}
+		input = append(input, valueInt)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err

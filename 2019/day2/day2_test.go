@@ -21,7 +21,7 @@ func TestDay2Intcode(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			solution, err := day2.IntcodeProgram(tc.input)
+			solution, err := day2.RunProgram(tc.input)
 			if err != nil {
 				t.Fatal(err)
 			}
