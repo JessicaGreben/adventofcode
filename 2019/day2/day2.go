@@ -3,6 +3,8 @@ package day2
 import (
 	"errors"
 	"fmt"
+
+	"golang.org/x/exp/slices"
 )
 
 type opCode int
@@ -79,7 +81,7 @@ func RunProgram(input []int) (int, error) {
 func Part2(input []int) (int, int, error) {
 	for noun := 0; noun < 100; noun++ {
 		for verb := 0; verb < 100; verb++ {
-			cp := makeCopy(input)
+			cp := slices.Clone(input)
 			restore(noun, verb, cp)
 			x, err := RunProgram(cp)
 			if err != nil {
@@ -91,8 +93,4 @@ func Part2(input []int) (int, int, error) {
 		}
 	}
 	return -1, -1, nil
-}
-
-func makeCopy(arr []int) []int {
-	return append([]int{}, arr...)
 }
