@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/jessicagreben/adventofcode/2019/day2"
+	"golang.org/x/exp/slices"
 )
 
 func TestDay2Intcode(t *testing.T) {
@@ -39,9 +40,7 @@ func TestDay2Intcode(t *testing.T) {
 }
 
 func TestDay2Part1(t *testing.T) {
-	cpInput := make([]int, len(day2.AoCInput))
-	copy(cpInput, day2.AoCInput)
-	solution, err := day2.Part1(cpInput)
+	solution, err := day2.Part1(slices.Clone(day2.AoCInput))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,9 +50,7 @@ func TestDay2Part1(t *testing.T) {
 }
 
 func TestDay2Part2(t *testing.T) {
-	cpInput := make([]int, len(day2.AoCInput))
-	copy(cpInput, day2.AoCInput)
-	noun, verb, err := day2.Part2(cpInput)
+	noun, verb, err := day2.Part2(slices.Clone(day2.AoCInput))
 	if err != nil {
 		t.Fatal(err)
 	}
