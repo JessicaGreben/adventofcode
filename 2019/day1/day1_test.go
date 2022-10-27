@@ -8,7 +8,7 @@ import (
 )
 
 func TestDay1Part1(t *testing.T) {
-	moduleMasses, err := input.ReadFromFileToI("input.txt")
+	moduleMasses, err := input.ReadIntsFromFile("input.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,7 @@ func TestDay1Part1(t *testing.T) {
 }
 
 func TestDay1Part2(t *testing.T) {
-	moduleMasses, err := input.ReadFromFileToI("input.txt")
+	moduleMasses, err := input.ReadIntsFromFile("input.txt")
 	if err != nil {
 		t.Fatal(err)
 	}

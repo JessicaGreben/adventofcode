@@ -59,16 +59,16 @@ func RunProgram(input []int) (int, error) {
 	var programCounter int
 	for programCounter < len(input) {
 		switch op := opCode(input[programCounter]); op {
-		case opCodeAdd:
+		case opCodeAdd, opCodeMultiply:
 			inputPtr1, inputPtr2, outputPtr := input[programCounter+1], input[programCounter+2], programCounter+3
 			value1, value2, dstIdx := input[inputPtr1], input[inputPtr2], input[outputPtr]
-			input[dstIdx] = value1 + value2
-			programCounter += opCodeInstructionCount[opCodeAdd]
-		case opCodeMultiply:
-			inputPtr1, inputPtr2, outputPtr := input[programCounter+1], input[programCounter+2], programCounter+3
-			value1, value2, dstIdx := input[inputPtr1], input[inputPtr2], input[outputPtr]
-			input[dstIdx] = value1 * value2
-			programCounter += opCodeInstructionCount[opCodeMultiply]
+			if op == opCodeAdd {
+				input[dstIdx] = value1 + value2
+			}
+			if op == opCodeMultiply {
+				input[dstIdx] = value1 * value2
+			}
+			programCounter += opCodeInstructionCount[op]
 		case opCodeTerminate:
 			return input[0], nil
 		default:

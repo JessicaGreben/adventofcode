@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func ReadFromFileToI(filepath string) ([]int, error) {
+func ReadIntsFromFile(filepath string) ([]int, error) {
 	fd, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
