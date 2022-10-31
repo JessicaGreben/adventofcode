@@ -58,24 +58,28 @@ func restore(noun, verb int, input []int) error {
 func RunProgram(input []int) (int, error) {
 	var programCounter int
 	for programCounter < len(input) {
-		switch op := opCode(input[programCounter]); op {
-		case opCodeAdd, opCodeMultiply:
-			inputPtr1, inputPtr2, outputPtr := input[programCounter+1], input[programCounter+2], programCounter+3
-			value1, value2, dstIdx := input[inputPtr1], input[inputPtr2], input[outputPtr]
-			if op == opCodeAdd {
-				input[dstIdx] = value1 + value2
-			}
-			if op == opCodeMultiply {
-				input[dstIdx] = value1 * value2
-			}
-			programCounter += opCodeInstructionCount[op]
+		op := opCode(input[programCounter])
+		switch op {
+		case opCodeAdd:
+			value1, value2, dstIdx := getValues(programCounter, input)
+			input[dstIdx] = value1 + value2
+		case opCodeMultiply:
+			value1, value2, dstIdx := getValues(programCounter, input)
+			input[dstIdx] = value1 * value2
 		case opCodeTerminate:
 			return input[0], nil
 		default:
 			return -1, fmt.Errorf("%w: %d", errInvalidOpCode, op)
 		}
+
+		programCounter += opCodeInstructionCount[op]
 	}
 	return input[0], nil
+}
+
+func getValues(programCounter int, input []int) (operand1, operand2, op int) {
+	operandPtr1, operandPtr2, outputPtr := input[programCounter+1], input[programCounter+2], programCounter+3
+	return input[operandPtr1], input[operandPtr2], input[outputPtr]
 }
 
 func Part2(input []int) (int, int, error) {
