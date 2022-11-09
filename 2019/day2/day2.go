@@ -61,10 +61,10 @@ func RunProgram(input []int) (int, error) {
 		op := opCode(input[programCounter])
 		switch op {
 		case opCodeAdd:
-			value1, value2, dstIdx := getValues(programCounter, input)
+			value1, value2, dstIdx := read2In1Out(programCounter, input)
 			input[dstIdx] = value1 + value2
 		case opCodeMultiply:
-			value1, value2, dstIdx := getValues(programCounter, input)
+			value1, value2, dstIdx := read2In1Out(programCounter, input)
 			input[dstIdx] = value1 * value2
 		case opCodeTerminate:
 			return input[0], nil
@@ -77,7 +77,7 @@ func RunProgram(input []int) (int, error) {
 	return input[0], nil
 }
 
-func getValues(programCounter int, input []int) (operand1, operand2, op int) {
+func read2In1Out(programCounter int, input []int) (operand1, operand2, op int) {
 	operandPtr1, operandPtr2, outputPtr := input[programCounter+1], input[programCounter+2], programCounter+3
 	return input[operandPtr1], input[operandPtr2], input[outputPtr]
 }
