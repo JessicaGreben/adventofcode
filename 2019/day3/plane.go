@@ -4,6 +4,8 @@ import (
 	"math"
 )
 
+var defaultCentralPoint = Point{0, 0}
+
 type Point struct {
 	X, Y int
 }
@@ -70,6 +72,9 @@ func NewPlane(centralPoint Point) *Plane {
 	}
 }
 
+// Plot plots a new object on the plane.
+// An object is represented by a collection of planePoints.
+// When a new object is plotted all the planePoints get the same objectID.
 func (p *Plane) Plot(points []planePoint) {
 	p.objectIDCounter++
 	for _, point := range points {
@@ -110,12 +115,12 @@ func (p *Plane) pointsIntersect(point1, point2 planePoint) bool {
 }
 
 func (p *Plane) isCentralPoint(point planePoint) bool {
-	return point.x() == p.centralPoint.X && point.y() == p.centralPoint.Y
+	return point.x() == p.centralPoint.x() && point.y() == p.centralPoint.y()
 }
 
 func manhattenDistance(point1, point2 Point) int {
-	x1, y1 := point1.X, point1.Y
-	x2, y2 := point2.X, point2.Y
+	x1, y1 := point1.x(), point1.y()
+	x2, y2 := point2.x(), point2.y()
 	return abs(x1-x2) + abs(y1-y2)
 }
 

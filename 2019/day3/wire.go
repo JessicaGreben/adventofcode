@@ -9,7 +9,7 @@ import (
 
 func convertInputToPoints(input []string) ([]planePoint, error) {
 	points := []planePoint{}
-	currX, currY := 0, 0
+	currX, currY := defaultCentralPoint.x(), defaultCentralPoint.y()
 	order := 0
 	for _, path := range input {
 		distance, err := strconv.Atoi(string(path[1:]))

@@ -21,7 +21,7 @@ func TestProgramPart1AoC(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	p := NewPlane(Point{0, 0})
+	p := NewPlane(defaultCentralPoint)
 	p.Plot(wire1)
 	p.Plot(wire2)
 	if want, got := 557, p.closestIntersection; want != got {
@@ -30,23 +30,11 @@ func TestProgramPart1AoC(t *testing.T) {
 }
 
 func TestProgramPart1(t *testing.T) {
-	/*
-			   ^
-			   |
-			xxx|xxx
-			x  |  x
-		<----x--oxxx----> x
-			x  |
-			xxxx
-			   |
-			   v
-	*/
 	wirePath := []string{"R3", "U2", "L5", "D4", "R3"}
 	gotPoints, err := convertInputToPoints(wirePath)
 	if err != nil {
 		t.Error(err)
 	}
-	//t.Logf("%#v\n", gotPoints)
 	t.Run("Test convertInputToPoints", func(t *testing.T) {
 		wantPoints := []planePoint{
 			{Point{X: 0, Y: 0}, 0, 0},
@@ -119,7 +107,6 @@ func TestProgramPart1(t *testing.T) {
 			{X: 0, Y: -2}:  {{Point{X: 0, Y: -2}, 1, 20}},
 			{X: 1, Y: -2}:  {{Point{X: 1, Y: -2}, 1, 21}},
 		}
-		//t.Logf("%#v\n", p.points)
 		if want, got := len(wantPoints), len(p.points); want != got {
 			t.Fatalf("points: want: %d, got: %d", want, got)
 		}
@@ -152,20 +139,7 @@ func TestProgramPart1(t *testing.T) {
 		}
 	})
 
-	/*  A coordinate plane with 2 "wires" labeled "1" and "2". A "B" denotes where both wires are.
-		   ^
-		   |
-		111|111
-		2B222  1
-	<---21--o111---->
-		2B2222
-		1111
-		   |
-		   v
-	*/
 	wirePath2 := []string{"U1", "L4", "D2", "R5"}
-	//t.Logf("%#v\n", gotPoints2)
-
 	t.Run("Plot second object", func(t *testing.T) {
 		wire2, err := convertInputToPoints(wirePath2)
 		if err != nil {
