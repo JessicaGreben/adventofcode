@@ -4,90 +4,113 @@ import (
 	"math"
 )
 
-// PlaneObject is an interface for an object that
-// is plotted on a coordinate plane.
-type PlaneObject interface {
-	Steps() []Step
-}
-
-// Step represents a single step of an object that is plotted on a plane.
-// A step is like an (x,y) point, but it has additional information about the
-// the object it belongs to
-type Step struct {
-	lineDirection lineType
-	point         Point
-	Value         int
-	objectID      int
-}
-
-func (s Step) Intersects(s2 Step) bool {
-	if s.objectID == s2.objectID {
-		return false
-	}
-	if s.lineDirection == s2.lineDirection {
-		return false
-	}
-	if isCentralPoint(s) || isCentralPoint(s2) {
-		return false
-	}
-	return s.point.X == s2.point.X && s.point.Y == s2.point.Y
-}
-
-func isCentralPoint(step Step) bool {
-	if step.point.X == 0 && step.point.Y == 0 {
-		return true
-	}
-	return false
-}
-
 type Point struct {
 	X, Y int
 }
 
-// Plane represents an (x,y) coordinate plane.
-// A plane can plot many different objects and assigns each new object
+func (p *Point) x() int {
+	return p.X
+}
+
+func (p *Point) y() int {
+	return p.Y
+}
+
+// planePoint is an x,y point that is plotted on a plane.
+// A collection of points gets plotted on a plane starting at the
+// plane's central point. Points are added one at a time and are assigned
+// an order when they are plotted. The order starts at 1 and increments one
+// at a time.
+// When a collection of points gets plotted on a plane as a single
+// object, the points for that object all have the same objectID.
+type planePoint struct {
+	Point
+	objectID int
+	order    int
+}
+
+func (p *planePoint) getPoint() Point {
+	return p.Point
+}
+
+func (p *planePoint) getObjectID() int {
+	return p.objectID
+}
+
+func (p *planePoint) setObjectID(id int) {
+	p.objectID = id
+}
+
+func (p *planePoint) getOrder() int {
+	return p.order
+}
+
+// Plane represents an x,y coordinate plane.
+// A plane can plot many different objects and it assigns each new object
 // an objectID to tell them apart.
-// The (x,y) coordinate plane is represented by a map where the key in
-// the map is an x,y point and the value in the map is a list of steps,
-// where a step is one step of an object.
+//
+// The x,y coordinate plane is represented by a map defined as:
+//   - key: an x,y point on the plane
+//   - value: list of object's orderedPoints at that position on the plane
+//
+// The centralPoint is the start location of all objects when they
+// are plotted on the plane.
 type Plane struct {
 	centralPoint        Point
 	closestIntersection int
-	points              map[Point][]Step
-	objectCount         int
+	points              map[Point][]planePoint
+	objectIDCounter     int
 }
 
 func NewPlane(centralPoint Point) *Plane {
 	return &Plane{
 		centralPoint:        centralPoint,
 		closestIntersection: math.MaxInt32,
-		points:              map[Point][]Step{},
+		points:              map[Point][]planePoint{},
 	}
 }
 
-func (p *Plane) Plot(obj PlaneObject) {
-	p.objectCount++
-	for _, step := range obj.Steps() {
-		step.objectID = p.objectCount
-		p.add(step)
+func (p *Plane) Plot(points []planePoint) {
+	p.objectIDCounter++
+	for _, point := range points {
+		point.setObjectID(p.objectIDCounter)
+		p.add(point)
 	}
 }
 
-func (p *Plane) add(newStep Step) {
-	existingSteps, ok := p.points[newStep.point]
+// add adds a new x,y point to the plane. When a new point is added to
+// the plane, it checks if it intersects with any other objects. If the new
+// point does intersect with other objects, then it calculates if its the
+// closest intersection to the central point.
+func (p *Plane) add(newPoint planePoint) {
+	existingPoints, ok := p.points[newPoint.getPoint()]
 	if ok {
-		for _, existingStep := range existingSteps {
-			if existingStep.Intersects(newStep) {
-				// if the new step intersects with an existing step then check if the distance
+		for _, existingPoint := range existingPoints {
+			if p.pointsIntersect(existingPoint, newPoint) {
+				// if the newPoint intersects with an existingPoint then check if the distance
 				// of this intersection is closer than any other intersection to the central point.
-				distance := manhattenDistance(p.centralPoint, newStep.point)
+				distance := manhattenDistance(p.centralPoint, newPoint.getPoint())
 				if distance < p.closestIntersection {
 					p.closestIntersection = distance
 				}
 			}
 		}
 	}
-	p.points[newStep.point] = append(p.points[newStep.point], newStep)
+	p.points[newPoint.getPoint()] = append(p.points[newPoint.getPoint()], newPoint)
+}
+
+func (p *Plane) pointsIntersect(point1, point2 planePoint) bool {
+	if point1.getObjectID() == point2.getObjectID() {
+		return false
+	}
+	if p.isCentralPoint(point1) || p.isCentralPoint(point2) {
+		return false
+	}
+	return point1.x() == point2.x() && point1.y() == point2.y()
+}
+
+func (p *Plane) isCentralPoint(point planePoint) bool {
+	return point.x() == p.centralPoint.X && point.y() == p.centralPoint.Y
 }
 
 func manhattenDistance(point1, point2 Point) int {

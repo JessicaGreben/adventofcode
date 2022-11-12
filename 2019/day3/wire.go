@@ -7,30 +7,46 @@ import (
 	"strconv"
 )
 
-type lineType int
-
-const (
-	lineTypeHorizontal lineType = 1
-	lineTypeVertical   lineType = 2
-)
-
-// Wire is a type of object that can be plotted on a coordinate plane.
-type Wire struct {
-	steps []Step
-}
-
-func NewWire(path []string) (*Wire, error) {
-	steps, err := convertInputToSteps(path)
-	if err != nil {
-		return nil, err
+func convertInputToPoints(input []string) ([]planePoint, error) {
+	points := []planePoint{}
+	currX, currY := 0, 0
+	order := 0
+	for _, path := range input {
+		distance, err := strconv.Atoi(string(path[1:]))
+		if err != nil {
+			return points, err
+		}
+		switch direction := path[0]; direction {
+		case 'R':
+			for i := currX; i <= currX+distance; i++ {
+				points = append(points, planePoint{Point{i, currY}, 0, order})
+				order++
+			}
+			currX += distance
+		case 'L':
+			for i := currX; i >= currX-distance; i-- {
+				points = append(points, planePoint{Point{i, currY}, 0, order})
+				order++
+			}
+			currX -= distance
+		case 'U':
+			for i := currY; i <= currY+distance; i++ {
+				points = append(points, planePoint{Point{currX, i}, 0, order})
+				order++
+			}
+			currY += distance
+		case 'D':
+			for i := currY; i >= currY-distance; i-- {
+				points = append(points, planePoint{Point{currX, i}, 0, order})
+				order++
+			}
+			currY -= distance
+		default:
+			return points, fmt.Errorf("direction not supported: %s", string(direction))
+		}
 	}
-	return &Wire{
-		steps: steps,
-	}, nil
-}
 
-func (w *Wire) Steps() []Step {
-	return w.steps
+	return points, nil
 }
 
 func readInput(filename string) ([]string, error) {
@@ -51,46 +67,4 @@ func readInput(filename string) ([]string, error) {
 		return nil, err
 	}
 	return directions, nil
-}
-
-func convertInputToSteps(input []string) ([]Step, error) {
-	steps := []Step{}
-	currX, currY := 0, 0
-	currStep := 0
-	for _, path := range input {
-		distance, err := strconv.Atoi(string(path[1:]))
-		if err != nil {
-			return steps, err
-		}
-		switch direction := path[0]; direction {
-		case 'R':
-			for i := currX; i <= currX+distance; i++ {
-				steps = append(steps, Step{lineTypeHorizontal, Point{i, currY}, currStep, 0})
-				currStep++
-			}
-			currX += distance
-		case 'L':
-			for i := currX; i >= currX-distance; i-- {
-				steps = append(steps, Step{lineTypeHorizontal, Point{i, currY}, currStep, 0})
-				currStep++
-			}
-			currX -= distance
-		case 'U':
-			for i := currY; i <= currY+distance; i++ {
-				steps = append(steps, Step{lineTypeVertical, Point{currX, i}, currStep, 0})
-				currStep++
-			}
-			currY += distance
-		case 'D':
-			for i := currY; i >= currY-distance; i-- {
-				steps = append(steps, Step{lineTypeVertical, Point{currX, i}, currStep, 0})
-				currStep++
-			}
-			currY -= distance
-		default:
-			return steps, fmt.Errorf("direction not supported: %s", string(direction))
-		}
-	}
-
-	return steps, nil
 }
