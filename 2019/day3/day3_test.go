@@ -30,16 +30,16 @@ func TestProgramPart1AoC(t *testing.T) {
 }
 
 func TestProgramPart1(t *testing.T) {
-	/*            y
-		          ^
-			      |
-		       xxx|xxx
-			   x  |  x
-	      <----x--oxxx----> x
-		       x  |
-			   xxxx
-			      |
-				  v
+	/*
+			   ^
+			   |
+			xxx|xxx
+			x  |  x
+		<----x--oxxx----> x
+			x  |
+			xxxx
+			   |
+			   v
 	*/
 	wirePath := []string{"R3", "U2", "L5", "D4", "R3"}
 	gotPoints, err := convertInputToPoints(wirePath)
@@ -153,16 +153,15 @@ func TestProgramPart1(t *testing.T) {
 	})
 
 	/*  A coordinate plane with 2 "wires" labeled "1" and "2". A "B" denotes where both wires are.
-	              y
-		          ^
-			      |
-		       111|111
-			  2B222  1
-	      <---21--o111----> x
-		      2B2222
-			   1111
-			      |
-				  v
+		   ^
+		   |
+		111|111
+		2B222  1
+	<---21--o111---->
+		2B2222
+		1111
+		   |
+		   v
 	*/
 	wirePath2 := []string{"U1", "L4", "D2", "R5"}
 	//t.Logf("%#v\n", gotPoints2)
