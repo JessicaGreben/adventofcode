@@ -18,25 +18,25 @@ func convertInputToPoints(input []string) ([]planePoint, error) {
 		}
 		switch direction := path[0]; direction {
 		case 'R':
-			for i := currX; i <= currX+distance; i++ {
+			for i := currX; i < currX+distance; i++ {
 				points = append(points, planePoint{Point{i, currY}, 0, order})
 				order++
 			}
 			currX += distance
 		case 'L':
-			for i := currX; i >= currX-distance; i-- {
+			for i := currX; i > currX-distance; i-- {
 				points = append(points, planePoint{Point{i, currY}, 0, order})
 				order++
 			}
 			currX -= distance
 		case 'U':
-			for i := currY; i <= currY+distance; i++ {
+			for i := currY; i < currY+distance; i++ {
 				points = append(points, planePoint{Point{currX, i}, 0, order})
 				order++
 			}
 			currY += distance
 		case 'D':
-			for i := currY; i >= currY-distance; i-- {
+			for i := currY; i > currY-distance; i-- {
 				points = append(points, planePoint{Point{currX, i}, 0, order})
 				order++
 			}

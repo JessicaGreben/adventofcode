@@ -58,17 +58,19 @@ func (p *planePoint) getOrder() int {
 // The centralPoint is the start location of all objects when they
 // are plotted on the plane.
 type Plane struct {
-	centralPoint        Point
-	closestIntersection int
-	points              map[Point][]planePoint
-	objectIDCounter     int
+	centralPoint               Point
+	closestIntersection        int
+	closestIntersectionByOrder int
+	points                     map[Point][]planePoint
+	objectIDCounter            int
 }
 
 func NewPlane(centralPoint Point) *Plane {
 	return &Plane{
-		centralPoint:        centralPoint,
-		closestIntersection: math.MaxInt32,
-		points:              map[Point][]planePoint{},
+		centralPoint:               centralPoint,
+		closestIntersection:        math.MaxInt32,
+		closestIntersectionByOrder: math.MaxInt32,
+		points:                     map[Point][]planePoint{},
 	}
 }
 
@@ -97,6 +99,11 @@ func (p *Plane) add(newPoint planePoint) {
 				distance := manhattenDistance(p.centralPoint, newPoint.getPoint())
 				if distance < p.closestIntersection {
 					p.closestIntersection = distance
+				}
+
+				distanceByOrder := existingPoint.order + newPoint.order
+				if distanceByOrder < p.closestIntersectionByOrder {
+					p.closestIntersectionByOrder = distanceByOrder
 				}
 			}
 		}

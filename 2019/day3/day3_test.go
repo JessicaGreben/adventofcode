@@ -27,6 +27,9 @@ func TestProgramPart1AoC(t *testing.T) {
 	if want, got := 557, p.closestIntersection; want != got {
 		t.Fatalf("closest intersection want: %d, got: %d", want, got)
 	}
+	if want, got := 56410, p.closestIntersectionByOrder; want != got {
+		t.Fatalf("closest intersection order want: %d, got: %d", want, got)
+	}
 }
 
 func TestProgramPart1(t *testing.T) {
@@ -41,24 +44,19 @@ func TestProgramPart1(t *testing.T) {
 			{Point{X: 1, Y: 0}, 0, 1},
 			{Point{X: 2, Y: 0}, 0, 2},
 			{Point{X: 3, Y: 0}, 0, 3},
-			{Point{X: 3, Y: 0}, 0, 4},
-			{Point{X: 3, Y: 1}, 0, 5},
-			{Point{X: 3, Y: 2}, 0, 6},
-			{Point{X: 3, Y: 2}, 0, 7},
-			{Point{X: 2, Y: 2}, 0, 8},
-			{Point{X: 1, Y: 2}, 0, 9},
-			{Point{X: 0, Y: 2}, 0, 10},
-			{Point{X: -1, Y: 2}, 0, 11},
-			{Point{X: -2, Y: 2}, 0, 12},
-			{Point{X: -2, Y: 2}, 0, 13},
-			{Point{X: -2, Y: 1}, 0, 14},
-			{Point{X: -2, Y: 0}, 0, 15},
-			{Point{X: -2, Y: -1}, 0, 16},
-			{Point{X: -2, Y: -2}, 0, 17},
-			{Point{X: -2, Y: -2}, 0, 18},
-			{Point{X: -1, Y: -2}, 0, 19},
-			{Point{X: 0, Y: -2}, 0, 20},
-			{Point{X: 1, Y: -2}, 0, 21},
+			{Point{X: 3, Y: 1}, 0, 4},
+			{Point{X: 3, Y: 2}, 0, 5},
+			{Point{X: 2, Y: 2}, 0, 6},
+			{Point{X: 1, Y: 2}, 0, 7},
+			{Point{X: 0, Y: 2}, 0, 8},
+			{Point{X: -1, Y: 2}, 0, 9},
+			{Point{X: -2, Y: 2}, 0, 10},
+			{Point{X: -2, Y: 1}, 0, 11},
+			{Point{X: -2, Y: 0}, 0, 12},
+			{Point{X: -2, Y: -1}, 0, 13},
+			{Point{X: -2, Y: -2}, 0, 14},
+			{Point{X: -1, Y: -2}, 0, 15},
+			{Point{X: 0, Y: -2}, 0, 16},
 		}
 		if want, got := len(wantPoints), len(gotPoints); want != got {
 			t.Fatalf("want: %d, got: %d", want, got)
@@ -91,21 +89,20 @@ func TestProgramPart1(t *testing.T) {
 			{X: 0, Y: 0}:   {{Point{X: 0, Y: 0}, 1, 0}},
 			{X: 1, Y: 0}:   {{Point{X: 1, Y: 0}, 1, 1}},
 			{X: 2, Y: 0}:   {{Point{X: 2, Y: 0}, 1, 2}},
-			{X: 3, Y: 0}:   {{Point{X: 3, Y: 0}, 1, 3}, {Point{X: 3, Y: 0}, 1, 4}},
-			{X: 3, Y: 1}:   {{Point{X: 3, Y: 1}, 1, 5}},
-			{X: 3, Y: 2}:   {{Point{X: 3, Y: 2}, 1, 6}, {Point{X: 3, Y: 2}, 1, 7}},
-			{X: 2, Y: 2}:   {{Point{X: 2, Y: 2}, 1, 8}},
-			{X: 1, Y: 2}:   {{Point{X: 1, Y: 2}, 1, 9}},
-			{X: 0, Y: 2}:   {{Point{X: 0, Y: 2}, 1, 10}},
-			{X: -1, Y: 2}:  {{Point{X: -1, Y: 2}, 1, 11}},
-			{X: -2, Y: 2}:  {{Point{X: -2, Y: 2}, 1, 12}, {Point{X: -2, Y: 2}, 1, 13}},
-			{X: -2, Y: 1}:  {{Point{X: -2, Y: 1}, 1, 14}},
-			{X: -2, Y: 0}:  {{Point{X: -2, Y: 0}, 1, 15}},
-			{X: -2, Y: -1}: {{Point{X: -2, Y: -1}, 1, 16}},
-			{X: -2, Y: -2}: {{Point{X: -2, Y: -2}, 1, 17}, {Point{X: -2, Y: -2}, 1, 18}},
-			{X: -1, Y: -2}: {{Point{X: -1, Y: -2}, 1, 19}},
-			{X: 0, Y: -2}:  {{Point{X: 0, Y: -2}, 1, 20}},
-			{X: 1, Y: -2}:  {{Point{X: 1, Y: -2}, 1, 21}},
+			{X: 3, Y: 0}:   {{Point{X: 3, Y: 0}, 1, 3}},
+			{X: 3, Y: 1}:   {{Point{X: 3, Y: 1}, 1, 4}},
+			{X: 3, Y: 2}:   {{Point{X: 3, Y: 2}, 1, 5}},
+			{X: 2, Y: 2}:   {{Point{X: 2, Y: 2}, 1, 6}},
+			{X: 1, Y: 2}:   {{Point{X: 1, Y: 2}, 1, 7}},
+			{X: 0, Y: 2}:   {{Point{X: 0, Y: 2}, 1, 8}},
+			{X: -1, Y: 2}:  {{Point{X: -1, Y: 2}, 1, 9}},
+			{X: -2, Y: 2}:  {{Point{X: -2, Y: 2}, 1, 10}},
+			{X: -2, Y: 1}:  {{Point{X: -2, Y: 1}, 1, 11}},
+			{X: -2, Y: 0}:  {{Point{X: -2, Y: 0}, 1, 12}},
+			{X: -2, Y: -1}: {{Point{X: -2, Y: -1}, 1, 13}},
+			{X: -2, Y: -2}: {{Point{X: -2, Y: -2}, 1, 14}},
+			{X: -1, Y: -2}: {{Point{X: -1, Y: -2}, 1, 15}},
+			{X: 0, Y: -2}:  {{Point{X: 0, Y: -2}, 1, 16}},
 		}
 		if want, got := len(wantPoints), len(p.points); want != got {
 			t.Fatalf("points: want: %d, got: %d", want, got)
