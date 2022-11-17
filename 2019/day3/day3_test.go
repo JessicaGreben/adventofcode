@@ -4,6 +4,29 @@ import (
 	"testing"
 )
 
+func TestPoint(t *testing.T) {
+	p1, p2 := Point{1, 2}, Point{1, 2}
+	if want, got := p1, p2; !want.eq(got) {
+		t.Fatalf("want %v, got %v", want, got)
+	}
+
+	p1, p2 = Point{1, 2}, Point{1, 3}
+	if want, got := p1, p2; want.eq(got) {
+		t.Fatalf("want %v, got %v", want, got)
+	}
+
+	want, got := p1.sub(p2), Point{0, -1}
+	if !want.eq(got) {
+		t.Fatalf("want %v, got %v", want, got)
+	}
+
+	p := Point{-1, -9}
+	want, got = p.abs(), Point{1, 9}
+	if !want.eq(got) {
+		t.Fatalf("want %v, got %v", want, got)
+	}
+}
+
 func TestProgramPart1AoC(t *testing.T) {
 	wirePath1, err := readInput("day3wire1.txt")
 	if err != nil {

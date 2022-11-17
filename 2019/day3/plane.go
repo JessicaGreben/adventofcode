@@ -18,6 +18,25 @@ func (p *Point) y() int {
 	return p.Y
 }
 
+func (p Point) eq(q Point) bool {
+	return p == q
+}
+
+// sub returns the vector p-q.
+func (p Point) sub(q Point) Point {
+	return Point{p.X - q.X, p.Y - q.Y}
+}
+
+func (p Point) abs() Point {
+	if p.x() < 0 {
+		p.X = -p.X
+	}
+	if p.y() < 0 {
+		p.Y = -p.Y
+	}
+	return p
+}
+
 // planePoint is an x,y point that is plotted on a plane.
 // A collection of points gets plotted on a plane starting at the
 // plane's central point. Points are added one at a time and are assigned
@@ -96,7 +115,7 @@ func (p *Plane) add(newPoint planePoint) {
 			if p.pointsIntersect(existingPoint, newPoint) {
 				// if the newPoint intersects with an existingPoint then check if the distance
 				// of this intersection is closer than any other intersection to the central point.
-				distance := manhattenDistance(p.centralPoint, newPoint.getPoint())
+				distance := manhattanDistance(p.centralPoint, newPoint.getPoint())
 				if distance < p.closestIntersection {
 					p.closestIntersection = distance
 				}
@@ -118,22 +137,14 @@ func (p *Plane) pointsIntersect(point1, point2 planePoint) bool {
 	if p.isCentralPoint(point1) || p.isCentralPoint(point2) {
 		return false
 	}
-	return point1.x() == point2.x() && point1.y() == point2.y()
+	return point1.eq(point2.getPoint())
 }
 
 func (p *Plane) isCentralPoint(point planePoint) bool {
-	return point.x() == p.centralPoint.x() && point.y() == p.centralPoint.y()
+	return point.eq(p.centralPoint)
 }
 
-func manhattenDistance(point1, point2 Point) int {
-	x1, y1 := point1.x(), point1.y()
-	x2, y2 := point2.x(), point2.y()
-	return abs(x1-x2) + abs(y1-y2)
-}
-
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
+func manhattanDistance(point1, point2 Point) int {
+	p := point1.sub(point2).abs()
+	return p.x() + p.y()
 }
