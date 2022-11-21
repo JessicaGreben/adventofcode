@@ -16,13 +16,12 @@ const (
 	opCodeUnknown   opCode = -1
 )
 
-var intToOpCode = map[int]opCode{
-	1:  opCodeAdd,
-	2:  opCodeMultiply,
-	3:  opCodeRead,
-	4:  opCodeWrite,
-	99: opCodeTerminate,
-	-1: opCodeUnknown,
+var isValid = map[opCode]bool{
+	opCodeAdd:       true,
+	opCodeMultiply:  true,
+	opCodeRead:      true,
+	opCodeWrite:     true,
+	opCodeTerminate: true,
 }
 
 var opCodeInstructionCount = map[opCode]int{
@@ -33,13 +32,13 @@ var opCodeInstructionCount = map[opCode]int{
 	opCodeTerminate: 1,
 }
 
-type parameterMode int
+type addressingMode int
 
 const (
-	// positionMode interprets a parameter as a postion.
-	positionMode parameterMode = 0
-	// immediateMode interprets a parameter as a value.
-	immediateMode parameterMode = 1
+	// absoluteAddress interprets a parameter as a postion.
+	absoluteAddress addressingMode = 0
+	// immediateValue interprets a parameter as a value.
+	immediateValue addressingMode = 1
 )
 
 var (
@@ -61,16 +60,16 @@ func NewProgram(input []int) *Program {
 
 func (p *Program) Run(input int) (int, error) {
 	for p.programCounter < len(p.instructions) {
-		op, paramModes, err := parseOpCodeParameterMode(p.instructions[p.programCounter])
+		op, addressingModes, err := parseOpCodeAddressMode(p.instructions[p.programCounter])
 		if err != nil {
 			return -1, err
 		}
 		switch op {
 		case opCodeAdd:
-			value1, value2, dstIdx := read2In1Out(p.programCounter, p.instructions, paramModes)
+			value1, value2, dstIdx := read2In1Out(p.programCounter, p.instructions, addressingModes)
 			p.instructions[dstIdx] = value1 + value2
 		case opCodeMultiply:
-			value1, value2, dstIdx := read2In1Out(p.programCounter, p.instructions, paramModes)
+			value1, value2, dstIdx := read2In1Out(p.programCounter, p.instructions, addressingModes)
 			p.instructions[dstIdx] = value1 * value2
 		case opCodeRead:
 			dstIdx := p.instructions[p.programCounter+1]
@@ -78,7 +77,7 @@ func (p *Program) Run(input int) (int, error) {
 		case opCodeWrite:
 			dstIdx := p.instructions[p.programCounter+1]
 			out := p.instructions[dstIdx]
-			if len(paramModes) >= 1 && paramModes[0] == immediateMode {
+			if len(addressingModes) >= 1 && addressingModes[0] == immediateValue {
 				out = dstIdx
 			}
 			p.output = append(p.output, out)
@@ -97,46 +96,45 @@ func (p *Program) Output() []int {
 	return p.output
 }
 
-func read2In1Out(programCounter int, input []int, paramModes []parameterMode) (operand1, operand2, op int) {
+func read2In1Out(programCounter int, input []int, addressingModes []addressingMode) (operand1, operand2, op int) {
 	operand1, operand2, output := input[programCounter+1], input[programCounter+2], input[programCounter+3]
-	if len(paramModes) == 0 || paramModes[0] == positionMode {
+	if len(addressingModes) == 0 || addressingModes[0] == absoluteAddress {
 		operand1 = input[operand1]
 	}
-	if len(paramModes) <= 1 || paramModes[1] == positionMode {
+	if len(addressingModes) <= 1 || addressingModes[1] == absoluteAddress {
 		operand2 = input[operand2]
 	}
 	return operand1, operand2, output
 }
 
-// parseOpCodeParameterMode parses the opCode and the parameter modes from the input.
-// opCode is a two-digit number based only on the ones and tens digit of the value.
-// parameter mode is series of digits starting from the hundreths place.
-func parseOpCodeParameterMode(value int) (opCode, []parameterMode, error) {
+// parseOpCodeAddressMode parses the opCode and the addressing modes from the input.
+// The opCode is a two-digit number based only on the ones and tens digit of the value.
+// The addressing mode is series of digits starting from the hundreths place.
+func parseOpCodeAddressMode(value int) (opCode, []addressingMode, error) {
 	opCodeValue := value
 	if value >= 100 {
 		opCodeValue %= 100
 	}
 
-	opcode, ok := intToOpCode[opCodeValue]
-	if !ok {
-		return opCodeUnknown, []parameterMode{}, fmt.Errorf("%w: %d", errInvalidOpCode, opCodeValue)
+	if ok := isValid[opCode(opCodeValue)]; !ok {
+		return opCodeUnknown, []addressingMode{}, fmt.Errorf("%w: %d", errInvalidOpCode, opCodeValue)
 	}
-	return opcode, parseParamModes(value / 100), nil
+	return opCode(opCodeValue), parseAddressingModes(value / 100), nil
 }
 
-// parseParamModes converts the input integer into a list of its digits,
-// then for each digit, convert it to the corresponding parameterMode.
-func parseParamModes(modes int) []parameterMode {
+// parseAddressingModes converts the input integer into a list of its digits,
+// then for each digit, converts it to the corresponding addressingMode.
+func parseAddressingModes(modes int) []addressingMode {
 	digits := intToDigits(modes)
-	params := make([]parameterMode, 0, len(digits))
+	addressModes := make([]addressingMode, 0, len(digits))
 	for _, digit := range digits {
-		paramMode := parameterMode(digit)
-		if paramMode != positionMode && paramMode != immediateMode {
-			return []parameterMode{}
+		addressMode := addressingMode(digit)
+		if addressMode != absoluteAddress && addressMode != immediateValue {
+			return []addressingMode{}
 		}
-		params = append(params, paramMode)
+		addressModes = append(addressModes, addressMode)
 	}
-	return params
+	return addressModes
 
 }
 

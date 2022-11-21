@@ -10,21 +10,21 @@ func TestParseOpCodeParameterMode(t *testing.T) {
 		name      string
 		input     int
 		wantCode  opCode
-		wantModes []parameterMode
+		wantModes []addressingMode
 		err       error
 	}{
-		{"1", 3, opCodeRead, []parameterMode{}, nil},
-		{"2", 1, opCodeAdd, []parameterMode{}, nil},
-		{"3", 1100, opCodeUnknown, []parameterMode{}, errInvalidOpCode},
-		{"4", 104, opCodeWrite, []parameterMode{immediateMode}, nil},
-		{"5", 1102, opCodeMultiply, []parameterMode{immediateMode, immediateMode}, nil},
-		{"6", 6, opCodeUnknown, []parameterMode{}, errInvalidOpCode},
-		{"7", 99, opCodeTerminate, []parameterMode{}, nil},
+		{"1", 3, opCodeRead, []addressingMode{}, nil},
+		{"2", 1, opCodeAdd, []addressingMode{}, nil},
+		{"3", 1100, opCodeUnknown, []addressingMode{}, errInvalidOpCode},
+		{"4", 104, opCodeWrite, []addressingMode{immediateValue}, nil},
+		{"5", 1102, opCodeMultiply, []addressingMode{immediateValue, immediateValue}, nil},
+		{"6", 6, opCodeUnknown, []addressingMode{}, errInvalidOpCode},
+		{"7", 99, opCodeTerminate, []addressingMode{}, nil},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			gotCode, gotModes, gotErr := parseOpCodeParameterMode(tc.input)
+			gotCode, gotModes, gotErr := parseOpCodeAddressMode(tc.input)
 			if !errors.Is(gotErr, tc.err) {
 				t.Errorf("want: %v, got: %v", tc.err, gotErr)
 			}
