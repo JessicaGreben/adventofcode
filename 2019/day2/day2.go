@@ -5,27 +5,14 @@ import (
 	"fmt"
 
 	"golang.org/x/exp/slices"
+
+	"github.com/jessicagreben/adventofcode/2019/pkg/intcode"
 )
-
-type opCode int
-
-const (
-	opCodeAdd       opCode = 1
-	opCodeMultiply  opCode = 2
-	opCodeTerminate opCode = 99
-)
-
-var opCodeInstructionCount = map[opCode]int{
-	opCodeAdd:       4,
-	opCodeMultiply:  4,
-	opCodeTerminate: 1,
-}
 
 var (
-	errInvalidOpCode = errors.New("invalid opCode")
-	errInvalidLen    = errors.New("invalid length")
-	errNounRange     = errors.New("noun out of [0,99] range")
-	errVerbRange     = errors.New("verb out of [0,99] range")
+	errInvalidLen = errors.New("invalid length")
+	errNounRange  = errors.New("noun out of [0,99] range")
+	errVerbRange  = errors.New("verb out of [0,99] range")
 )
 
 func Part1(input []int) (int, error) {
@@ -36,7 +23,8 @@ func Part1(input []int) (int, error) {
 	if err := restore(noun, verb, input); err != nil {
 		return -1, err
 	}
-	return RunProgram(input)
+	p := intcode.NewProgram(input)
+	return p.Run(-1)
 }
 
 func restore(noun, verb int, input []int) error {
@@ -55,39 +43,13 @@ func restore(noun, verb int, input []int) error {
 	return nil
 }
 
-func RunProgram(input []int) (int, error) {
-	var programCounter int
-	for programCounter < len(input) {
-		op := opCode(input[programCounter])
-		switch op {
-		case opCodeAdd:
-			value1, value2, dstIdx := read2In1Out(programCounter, input)
-			input[dstIdx] = value1 + value2
-		case opCodeMultiply:
-			value1, value2, dstIdx := read2In1Out(programCounter, input)
-			input[dstIdx] = value1 * value2
-		case opCodeTerminate:
-			return input[0], nil
-		default:
-			return -1, fmt.Errorf("%w: %d", errInvalidOpCode, op)
-		}
-
-		programCounter += opCodeInstructionCount[op]
-	}
-	return input[0], nil
-}
-
-func read2In1Out(programCounter int, input []int) (operand1, operand2, op int) {
-	operandPtr1, operandPtr2, outputPtr := input[programCounter+1], input[programCounter+2], programCounter+3
-	return input[operandPtr1], input[operandPtr2], input[outputPtr]
-}
-
 func Part2(input []int) (int, int, error) {
 	for noun := 0; noun < 100; noun++ {
 		for verb := 0; verb < 100; verb++ {
 			cp := slices.Clone(input)
 			restore(noun, verb, cp)
-			x, err := RunProgram(cp)
+			p := intcode.NewProgram(cp)
+			x, err := p.Run(-1)
 			if err != nil {
 				return -1, -1, err
 			}

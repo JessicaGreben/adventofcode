@@ -3,8 +3,10 @@ package day2_test
 import (
 	"testing"
 
-	"github.com/jessicagreben/adventofcode/2019/day2"
 	"golang.org/x/exp/slices"
+
+	"github.com/jessicagreben/adventofcode/2019/day2"
+	"github.com/jessicagreben/adventofcode/2019/pkg/intcode"
 )
 
 func TestDay2Intcode(t *testing.T) {
@@ -22,7 +24,8 @@ func TestDay2Intcode(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			solution, err := day2.RunProgram(tc.input)
+			p := intcode.NewProgram(tc.input)
+			solution, err := p.Run(-1)
 			if err != nil {
 				t.Fatal(err)
 			}
