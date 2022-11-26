@@ -51,6 +51,8 @@ const (
 	absoluteAddress addressingMode = 0
 	// immediateValue interprets a parameter as a value.
 	immediateValue addressingMode = 1
+
+	noJump = -1
 )
 
 var (
@@ -72,7 +74,7 @@ func NewProgram(instructions []int) *Program {
 }
 
 func (p *Program) Run(input int) error {
-	for p.Next() {
+	for {
 		opcode, parameterIndexes, err := p.Parse()
 		if err != nil {
 			return err
@@ -83,15 +85,16 @@ func (p *Program) Run(input int) error {
 		if opcode == opCodeRead {
 			p.instructions[parameterIndexes[0]] = input
 		}
-		if err := p.Exec(opcode, parameterIndexes); err != nil {
+		jumpTo, err := p.Exec(opcode, parameterIndexes)
+		if err != nil {
 			return err
 		}
-	}
-	return nil
-}
 
-func (p *Program) Next() bool {
-	return p.programCounter < len(p.instructions)
+		p.programCounter += opCodeInstructionCount[opcode]
+		if jumpTo != noJump {
+			p.programCounter = jumpTo
+		}
+	}
 }
 
 func (p *Program) Parse() (opCode, []int, error) {
@@ -104,46 +107,26 @@ func (p *Program) Parse() (opCode, []int, error) {
 }
 
 func (p *Program) parseOpCodeAddressMode() (opCode, []addressingMode, error) {
-	opCodeValue := p.instructions[p.programCounter]
+	// Parse opcode converts the instruction to an opcode.
+	instruction := p.instructions[p.programCounter]
+	opCodeValue := instruction
 	if opCodeValue >= 100 {
 		opCodeValue %= 100
 	}
-
 	if ok := isValid[opCode(opCodeValue)]; !ok {
 		return opCodeUnknown, nil, fmt.Errorf("%w: opCode=%d", errInvalidOpCode, opCodeValue)
 	}
-	modes := parseAddressingModes(p.instructions[p.programCounter] / 100)
-	return opCode(opCodeValue), modes, nil
-}
 
-// parseOpCodeAddressMode parses the opCode and the addressing modes from the input.
-// The opCode is a two-digit number based only on the ones and tens digit of the value.
-// The addressing mode is series of digits starting from the hundreths place.
-func parseOpCodeAddressMode(value int) (opCode, []addressingMode, error) {
-	opCodeValue := value
-	if value >= 100 {
-		opCodeValue %= 100
-	}
-
-	if ok := isValid[opCode(opCodeValue)]; !ok {
-		return opCodeUnknown, []addressingMode{}, fmt.Errorf("%w: %d", errInvalidOpCode, opCodeValue)
-	}
-	return opCode(opCodeValue), parseAddressingModes(value / 100), nil
-}
-
-// parseAddressingModes converts the input integer into a list of its digits,
-// then for each digit, converts it to the corresponding addressingMode.
-func parseAddressingModes(modes int) []addressingMode {
-	digits := intToDigits(modes)
+	// Parse address modes converts the input integer into a list of its digits.
+	// Each digit is converted it to the corresponding addressingMode.
+	modeValue := instruction / 100
+	digits := intToDigits(modeValue)
 	addressModes := make([]addressingMode, 0, len(digits))
 	for _, digit := range digits {
 		addressMode := addressingMode(digit)
-		if addressMode != absoluteAddress && addressMode != immediateValue {
-			return []addressingMode{}
-		}
 		addressModes = append(addressModes, addressMode)
 	}
-	return addressModes
+	return opCode(opCodeValue), addressModes, nil
 }
 
 // intToDigits splits the input integer into a slice of its digits where each digit is an int.
@@ -159,92 +142,68 @@ func intToDigits(value int) []int {
 	return digits
 }
 
+// parseParameterIndexes converts the addressing modes to the index of the location of the parameters
+// for the opcode instruction.
 func (p *Program) parseParameterIndexes(opcode opCode, modes []addressingMode) []int {
 	parameterCount := opCodeInstructionCount[opcode] - 1
 	indexes := make([]int, 0, parameterCount)
-	for i := 1; i <= parameterCount; i++ {
+	for modeIdx, parameterIdx := 0, p.programCounter+1; modeIdx < parameterCount; modeIdx, parameterIdx = modeIdx+1, parameterIdx+1 {
 		mode := absoluteAddress
-		if len(modes) > 0 && i-1 < len(modes) {
-			mode = modes[i-1]
+		if len(modes) > 0 && modeIdx < len(modes) {
+			mode = modes[modeIdx]
 		}
 
-		idx := p.programCounter + i
 		if mode == absoluteAddress {
-			indexes = append(indexes, p.instructions[idx])
+			indexes = append(indexes, p.instructions[parameterIdx])
 		}
 		if mode == immediateValue {
-			indexes = append(indexes, idx)
+			indexes = append(indexes, parameterIdx)
 		}
 	}
 	return indexes
 }
 
-func (p *Program) Exec(op opCode, indexes []int) error {
+func (p *Program) Exec(op opCode, indexes []int) (int, error) {
+	if len(indexes) < opCodeInstructionCount[op]-1 {
+		return noJump, fmt.Errorf("%w: expected=%d, len(indexes)=%d", errIndexCount, opCodeInstructionCount[op]-1, len(indexes))
+	}
 	switch op {
 	case opCodeAdd:
-		if len(indexes) < 3 {
-			return fmt.Errorf("%w: expected=3, len(indexes)=%d", errIndexCount, len(indexes))
-		}
-		value1, value2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
-		p.instructions[dstIdx] = value1 + value2
-		p.programCounter += opCodeInstructionCount[op]
+		operand1, operand2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
+		p.instructions[dstIdx] = operand1 + operand2
 	case opCodeMultiply:
-		if len(indexes) < 3 {
-			return fmt.Errorf("%w: expected=3, len(indexes)=%d", errIndexCount, len(indexes))
-		}
-		value1, value2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
-		p.instructions[dstIdx] = value1 * value2
-		p.programCounter += opCodeInstructionCount[op]
+		operand1, operand2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
+		p.instructions[dstIdx] = operand1 * operand2
 	case opCodeRead:
-		p.programCounter += opCodeInstructionCount[op]
+		// no op
 	case opCodeWrite:
-		if len(indexes) < 1 {
-			return fmt.Errorf("%w: expected=1, len(indexes)=%d", errIndexCount, len(indexes))
-		}
 		p.output = append(p.output, p.instructions[indexes[0]])
-		p.programCounter += opCodeInstructionCount[op]
 	case opCodeJIT:
-		if len(indexes) < 2 {
-			return fmt.Errorf("%w: expected=2, len(indexes)=%d", errIndexCount, len(indexes))
-		}
-		value1, value2 := p.instructions[indexes[0]], p.instructions[indexes[1]]
-		p.programCounter += opCodeInstructionCount[op]
-		if value1 != 0 {
-			p.programCounter = value2
+		jumpCondition, jumpTo := p.instructions[indexes[0]], p.instructions[indexes[1]]
+		if jumpCondition != 0 {
+			return jumpTo, nil
 		}
 	case opCodeJIF:
-		if len(indexes) < 2 {
-			return fmt.Errorf("%w: expected=2, len(indexes)=%d", errIndexCount, len(indexes))
-		}
-		value1, value2 := p.instructions[indexes[0]], p.instructions[indexes[1]]
-		p.programCounter += opCodeInstructionCount[op]
-		if value1 == 0 {
-			p.programCounter = value2
+		jumpCondition, jumpTo := p.instructions[indexes[0]], p.instructions[indexes[1]]
+		if jumpCondition == 0 {
+			return jumpTo, nil
 		}
 	case opCodeLT:
-		if len(indexes) < 3 {
-			return fmt.Errorf("%w: expected=3, len(indexes)=%d", errIndexCount, len(indexes))
+		operand1, operand2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
+		p.instructions[dstIdx] = 0
+		if operand1 < operand2 {
+			p.instructions[dstIdx] = 1
 		}
-		value1, value2, value3 := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
-		p.instructions[value3] = 0
-		if value1 < value2 {
-			p.instructions[value3] = 1
-		}
-		p.programCounter += opCodeInstructionCount[op]
 	case opCodeEQ:
-		if len(indexes) < 3 {
-			return fmt.Errorf("%w: expected=3, len(indexes)=%d", errIndexCount, len(indexes))
+		operand1, operand2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
+		p.instructions[dstIdx] = 0
+		if operand1 == operand2 {
+			p.instructions[dstIdx] = 1
 		}
-		value1, value2, value3 := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
-		p.instructions[value3] = 0
-		if value1 == value2 {
-			p.instructions[value3] = 1
-		}
-		p.programCounter += opCodeInstructionCount[op]
 	default:
-		return fmt.Errorf("%w: %d", errInvalidOpCode, op)
+		return noJump, fmt.Errorf("%w: opcode=%d", errInvalidOpCode, op)
 	}
-	return nil
+	return noJump, nil
 }
 
 func (p *Program) Output() []int {
