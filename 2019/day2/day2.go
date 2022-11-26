@@ -24,7 +24,10 @@ func Part1(input []int) (int, error) {
 		return -1, err
 	}
 	p := intcode.NewProgram(input)
-	return p.Run(-1)
+	if err := p.Run(-1); err != nil {
+		return -1, err
+	}
+	return p.Instructions()[0], nil
 }
 
 func restore(noun, verb int, input []int) error {
@@ -49,11 +52,10 @@ func Part2(input []int) (int, int, error) {
 			cp := slices.Clone(input)
 			restore(noun, verb, cp)
 			p := intcode.NewProgram(cp)
-			x, err := p.Run(-1)
-			if err != nil {
+			if err := p.Run(-1); err != nil {
 				return -1, -1, err
 			}
-			if x == 19690720 {
+			if p.Instructions()[0] == 19690720 {
 				return noun, verb, nil
 			}
 		}
