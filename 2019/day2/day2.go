@@ -27,7 +27,7 @@ func Part1(input []int) (int, error) {
 	if err := p.Run(-1); err != nil {
 		return -1, err
 	}
-	return p.Instructions()[0], nil
+	return p.Memory()[0], nil
 }
 
 func restore(noun, verb int, input []int) error {
@@ -55,7 +55,7 @@ func Part2(input []int) (int, int, error) {
 			if err := p.Run(-1); err != nil {
 				return -1, -1, err
 			}
-			if p.Instructions()[0] == 19690720 {
+			if p.Memory()[0] == 19690720 {
 				return noun, verb, nil
 			}
 		}

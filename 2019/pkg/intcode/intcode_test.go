@@ -57,7 +57,7 @@ func TestParse(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			p := NewProgram(tc.instructions)
-			opcode, parameterIndexes, err := p.Parse()
+			opcode, parameterIndexes, err := p.ParseOp()
 			if err != nil {
 				t.Error(err)
 			}

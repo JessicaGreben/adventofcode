@@ -29,7 +29,7 @@ func TestDay2Intcode(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if want, got := tc.want, p.Instructions()[0]; want != got {
+			if want, got := tc.want, p.Memory()[0]; want != got {
 				t.Errorf("want: %d, got: %d", want, got)
 			}
 

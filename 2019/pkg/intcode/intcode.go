@@ -62,20 +62,20 @@ var (
 
 type Program struct {
 	programCounter int
-	instructions   []int
+	memory         []int
 	output         []int
 }
 
-func NewProgram(instructions []int) *Program {
+func NewProgram(memory []int) *Program {
 	return &Program{
-		instructions: instructions,
-		output:       []int{},
+		memory: memory,
+		output: []int{},
 	}
 }
 
 func (p *Program) Run(input int) error {
 	for {
-		opcode, parameterIndexes, err := p.Parse()
+		opcode, parameterIndexes, err := p.ParseOp()
 		if err != nil {
 			return err
 		}
@@ -83,7 +83,7 @@ func (p *Program) Run(input int) error {
 			return nil
 		}
 		if opcode == opCodeRead {
-			p.instructions[parameterIndexes[0]] = input
+			p.memory[parameterIndexes[0]] = input
 		}
 		jumpTo, err := p.Exec(opcode, parameterIndexes)
 		if err != nil {
@@ -97,7 +97,7 @@ func (p *Program) Run(input int) error {
 	}
 }
 
-func (p *Program) Parse() (opCode, []int, error) {
+func (p *Program) ParseOp() (opCode, []int, error) {
 	opcode, modes, err := p.parseOpCodeAddressMode()
 	if err != nil {
 		return opCodeUnknown, []int{}, err
@@ -108,7 +108,7 @@ func (p *Program) Parse() (opCode, []int, error) {
 
 func (p *Program) parseOpCodeAddressMode() (opCode, []addressingMode, error) {
 	// Parse opcode converts the instruction to an opcode.
-	instruction := p.instructions[p.programCounter]
+	instruction := p.memory[p.programCounter]
 	opCodeValue := instruction
 	if opCodeValue >= 100 {
 		opCodeValue %= 100
@@ -154,7 +154,7 @@ func (p *Program) parseParameterIndexes(opcode opCode, modes []addressingMode) [
 		}
 
 		if mode == absoluteAddress {
-			indexes = append(indexes, p.instructions[parameterIdx])
+			indexes = append(indexes, p.memory[parameterIdx])
 		}
 		if mode == immediateValue {
 			indexes = append(indexes, parameterIdx)
@@ -169,36 +169,36 @@ func (p *Program) Exec(op opCode, indexes []int) (int, error) {
 	}
 	switch op {
 	case opCodeAdd:
-		operand1, operand2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
-		p.instructions[dstIdx] = operand1 + operand2
+		operand1, operand2, dstIdx := p.memory[indexes[0]], p.memory[indexes[1]], indexes[2]
+		p.memory[dstIdx] = operand1 + operand2
 	case opCodeMultiply:
-		operand1, operand2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
-		p.instructions[dstIdx] = operand1 * operand2
+		operand1, operand2, dstIdx := p.memory[indexes[0]], p.memory[indexes[1]], indexes[2]
+		p.memory[dstIdx] = operand1 * operand2
 	case opCodeRead:
 		// no op
 	case opCodeWrite:
-		p.output = append(p.output, p.instructions[indexes[0]])
+		p.output = append(p.output, p.memory[indexes[0]])
 	case opCodeJIT:
-		jumpCondition, jumpTo := p.instructions[indexes[0]], p.instructions[indexes[1]]
+		jumpCondition, jumpTo := p.memory[indexes[0]], p.memory[indexes[1]]
 		if jumpCondition != 0 {
 			return jumpTo, nil
 		}
 	case opCodeJIF:
-		jumpCondition, jumpTo := p.instructions[indexes[0]], p.instructions[indexes[1]]
+		jumpCondition, jumpTo := p.memory[indexes[0]], p.memory[indexes[1]]
 		if jumpCondition == 0 {
 			return jumpTo, nil
 		}
 	case opCodeLT:
-		operand1, operand2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
-		p.instructions[dstIdx] = 0
+		operand1, operand2, dstIdx := p.memory[indexes[0]], p.memory[indexes[1]], indexes[2]
+		p.memory[dstIdx] = 0
 		if operand1 < operand2 {
-			p.instructions[dstIdx] = 1
+			p.memory[dstIdx] = 1
 		}
 	case opCodeEQ:
-		operand1, operand2, dstIdx := p.instructions[indexes[0]], p.instructions[indexes[1]], indexes[2]
-		p.instructions[dstIdx] = 0
+		operand1, operand2, dstIdx := p.memory[indexes[0]], p.memory[indexes[1]], indexes[2]
+		p.memory[dstIdx] = 0
 		if operand1 == operand2 {
-			p.instructions[dstIdx] = 1
+			p.memory[dstIdx] = 1
 		}
 	default:
 		return noJump, fmt.Errorf("%w: opcode=%d", errInvalidOpCode, op)
@@ -210,6 +210,6 @@ func (p *Program) Output() []int {
 	return p.output
 }
 
-func (p *Program) Instructions() []int {
-	return p.instructions
+func (p *Program) Memory() []int {
+	return p.memory
 }
