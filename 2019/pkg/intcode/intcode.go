@@ -120,26 +120,32 @@ func (p *Program) parseOpCodeAddressMode() (opCode, []addressingMode, error) {
 	// Parse address modes converts the input integer into a list of its digits.
 	// Each digit is converted it to the corresponding addressingMode.
 	modeValue := instruction / 100
-	digits := intToDigits(modeValue)
-	addressModes := make([]addressingMode, 0, len(digits))
-	for _, digit := range digits {
-		addressMode := addressingMode(digit)
-		addressModes = append(addressModes, addressMode)
+	digit := iterateDigits(modeValue)
+	addressModes := []addressingMode{}
+	for digit.next() {
+		addressModes = append(addressModes, addressingMode(digit.value()))
 	}
 	return opCode(opCodeValue), addressModes, nil
 }
 
-// intToDigits splits the input integer into a slice of its digits where each digit is an int.
-// The least signigicant digit is at index 0 of the output.
-func intToDigits(value int) []int {
-	digits := []int{}
-	n := value
-	for n > 0 {
-		r := n % 10
-		digits = append(digits, r)
-		n /= 10
+type digit struct {
+	n int
+}
+
+func iterateDigits(value int) *digit {
+	return &digit{
+		n: value,
 	}
-	return digits
+}
+
+func (d *digit) next() bool {
+	return d.n > 0
+}
+
+func (d *digit) value() int {
+	r := d.n % 10
+	d.n /= 10
+	return r
 }
 
 // parseParameterIndexes converts the addressing modes to the index of the location of the parameters

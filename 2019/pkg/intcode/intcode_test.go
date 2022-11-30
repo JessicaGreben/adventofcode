@@ -19,7 +19,11 @@ func TestIntToDigits(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			output := intToDigits(tc.input)
+			digit := iterateDigits(tc.input)
+			output := []int{}
+			for digit.next() {
+				output = append(output, digit.value())
+			}
 			if want, got := len(tc.want), len(output); want != got {
 				t.Fatalf("want: %d, got: %d", want, got)
 			}
