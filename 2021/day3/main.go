@@ -32,7 +32,7 @@ func main() {
 			case "1":
 				count1[i]++
 			default:
-				log.Fatalf("not valid, expected 0 or 1, got:", x)
+				log.Fatal("not valid, expected 0 or 1, got:", x)
 			}
 		}
 	}
