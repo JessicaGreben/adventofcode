@@ -51,7 +51,7 @@ func TestPacketMarker(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if want, got := tc.output, findPacketMarker(tc.input); want != got {
+			if want, got := tc.output, findMarker(tc.input, 4); want != got {
 				t.Errorf("want: %v, got: %v", want, got)
 			}
 		})
@@ -92,7 +92,7 @@ func TestMessage(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if want, got := tc.output, findMessage(tc.input); want != got {
+			if want, got := tc.output, findMarker(tc.input, 14); want != got {
 				t.Errorf("want: %v, got: %v", want, got)
 			}
 		})
