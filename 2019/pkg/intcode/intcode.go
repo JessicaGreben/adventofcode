@@ -12,6 +12,10 @@ const (
 	opCodeMultiply  opCode = 2
 	opCodeRead      opCode = 3
 	opCodeWrite     opCode = 4
+	opCodeJIT       opCode = 5
+	opCodeJIF       opCode = 6
+	opCodeLT        opCode = 7
+	opCodeEQ        opCode = 8
 	opCodeTerminate opCode = 99
 	opCodeUnknown   opCode = -1
 )
@@ -21,6 +25,10 @@ var isValid = map[opCode]bool{
 	opCodeMultiply:  true,
 	opCodeRead:      true,
 	opCodeWrite:     true,
+	opCodeJIT:       true,
+	opCodeJIF:       true,
+	opCodeLT:        true,
+	opCodeEQ:        true,
 	opCodeTerminate: true,
 }
 
@@ -29,6 +37,10 @@ var opCodeInstructionCount = map[opCode]int{
 	opCodeMultiply:  4,
 	opCodeRead:      2,
 	opCodeWrite:     2,
+	opCodeJIT:       3,
+	opCodeJIF:       3,
+	opCodeLT:        4,
+	opCodeEQ:        4,
 	opCodeTerminate: 1,
 }
 
@@ -39,114 +51,171 @@ const (
 	absoluteAddress addressingMode = 0
 	// immediateValue interprets a parameter as a value.
 	immediateValue addressingMode = 1
+
+	noJump = -1
 )
 
 var (
 	errInvalidOpCode = errors.New("invalid opCode")
+	errIndexCount    = errors.New("wrong number of indexes provided")
 )
 
 type Program struct {
 	programCounter int
-	instructions   []int
+	memory         []int
 	output         []int
 }
 
-func NewProgram(input []int) *Program {
+func NewProgram(memory []int) *Program {
 	return &Program{
-		instructions: input,
-		output:       []int{},
+		memory: memory,
+		output: []int{},
 	}
 }
 
-func (p *Program) Run(input int) (int, error) {
-	for p.programCounter < len(p.instructions) {
-		op, addressingModes, err := parseOpCodeAddressMode(p.instructions[p.programCounter])
+func (p *Program) Run(input int) error {
+	for {
+		opcode, parameterIndexes, err := p.ParseOp()
 		if err != nil {
-			return -1, err
+			return err
 		}
-		switch op {
-		case opCodeAdd:
-			value1, value2, dstIdx := read2In1Out(p.programCounter, p.instructions, addressingModes)
-			p.instructions[dstIdx] = value1 + value2
-		case opCodeMultiply:
-			value1, value2, dstIdx := read2In1Out(p.programCounter, p.instructions, addressingModes)
-			p.instructions[dstIdx] = value1 * value2
-		case opCodeRead:
-			dstIdx := p.instructions[p.programCounter+1]
-			p.instructions[dstIdx] = input
-		case opCodeWrite:
-			dstIdx := p.instructions[p.programCounter+1]
-			out := p.instructions[dstIdx]
-			if len(addressingModes) >= 1 && addressingModes[0] == immediateValue {
-				out = dstIdx
-			}
-			p.output = append(p.output, out)
-		case opCodeTerminate:
-			return p.instructions[0], nil
-		default:
-			return -1, fmt.Errorf("%w: %d", errInvalidOpCode, op)
+		if opcode == opCodeTerminate {
+			return nil
+		}
+		if opcode == opCodeRead {
+			p.memory[parameterIndexes[0]] = input
+		}
+		jumpTo, err := p.Exec(opcode, parameterIndexes)
+		if err != nil {
+			return err
 		}
 
-		p.programCounter += opCodeInstructionCount[op]
+		p.programCounter += opCodeInstructionCount[opcode]
+		if jumpTo != noJump {
+			p.programCounter = jumpTo
+		}
 	}
-	return p.instructions[0], nil
+}
+
+func (p *Program) ParseOp() (opCode, []int, error) {
+	opcode, modes, err := p.parseOpCodeAddressMode()
+	if err != nil {
+		return opCodeUnknown, []int{}, err
+	}
+	indexes := p.parseParameterIndexes(opcode, modes)
+	return opcode, indexes, err
+}
+
+func (p *Program) parseOpCodeAddressMode() (opCode, []addressingMode, error) {
+	// Parse opcode converts the instruction to an opcode.
+	instruction := p.memory[p.programCounter]
+	opCodeValue := instruction
+	if opCodeValue >= 100 {
+		opCodeValue %= 100
+	}
+	if ok := isValid[opCode(opCodeValue)]; !ok {
+		return opCodeUnknown, nil, fmt.Errorf("%w: opCode=%d", errInvalidOpCode, opCodeValue)
+	}
+
+	// Parse address modes converts the input integer into a list of its digits.
+	// Each digit is converted it to the corresponding addressingMode.
+	modeValue := instruction / 100
+	digit := iterateDigits(modeValue)
+	addressModes := []addressingMode{}
+	for digit.next() {
+		addressModes = append(addressModes, addressingMode(digit.value()))
+	}
+	return opCode(opCodeValue), addressModes, nil
+}
+
+type digit struct {
+	n int
+}
+
+func iterateDigits(value int) *digit {
+	return &digit{
+		n: value,
+	}
+}
+
+func (d *digit) next() bool {
+	return d.n > 0
+}
+
+func (d *digit) value() int {
+	r := d.n % 10
+	d.n /= 10
+	return r
+}
+
+// parseParameterIndexes converts the addressing modes to the index of the location of the parameters
+// for the opcode instruction.
+func (p *Program) parseParameterIndexes(opcode opCode, modes []addressingMode) []int {
+	parameterCount := opCodeInstructionCount[opcode] - 1
+	indexes := make([]int, 0, parameterCount)
+	for modeIdx, parameterIdx := 0, p.programCounter+1; modeIdx < parameterCount; modeIdx, parameterIdx = modeIdx+1, parameterIdx+1 {
+		mode := absoluteAddress
+		if len(modes) > 0 && modeIdx < len(modes) {
+			mode = modes[modeIdx]
+		}
+
+		if mode == absoluteAddress {
+			indexes = append(indexes, p.memory[parameterIdx])
+		}
+		if mode == immediateValue {
+			indexes = append(indexes, parameterIdx)
+		}
+	}
+	return indexes
+}
+
+func (p *Program) Exec(op opCode, indexes []int) (int, error) {
+	if len(indexes) < opCodeInstructionCount[op]-1 {
+		return noJump, fmt.Errorf("%w: expected=%d, len(indexes)=%d", errIndexCount, opCodeInstructionCount[op]-1, len(indexes))
+	}
+	switch op {
+	case opCodeAdd:
+		operand1, operand2, dstIdx := p.memory[indexes[0]], p.memory[indexes[1]], indexes[2]
+		p.memory[dstIdx] = operand1 + operand2
+	case opCodeMultiply:
+		operand1, operand2, dstIdx := p.memory[indexes[0]], p.memory[indexes[1]], indexes[2]
+		p.memory[dstIdx] = operand1 * operand2
+	case opCodeRead:
+		// no op
+	case opCodeWrite:
+		p.output = append(p.output, p.memory[indexes[0]])
+	case opCodeJIT:
+		jumpCondition, jumpTo := p.memory[indexes[0]], p.memory[indexes[1]]
+		if jumpCondition != 0 {
+			return jumpTo, nil
+		}
+	case opCodeJIF:
+		jumpCondition, jumpTo := p.memory[indexes[0]], p.memory[indexes[1]]
+		if jumpCondition == 0 {
+			return jumpTo, nil
+		}
+	case opCodeLT:
+		operand1, operand2, dstIdx := p.memory[indexes[0]], p.memory[indexes[1]], indexes[2]
+		p.memory[dstIdx] = 0
+		if operand1 < operand2 {
+			p.memory[dstIdx] = 1
+		}
+	case opCodeEQ:
+		operand1, operand2, dstIdx := p.memory[indexes[0]], p.memory[indexes[1]], indexes[2]
+		p.memory[dstIdx] = 0
+		if operand1 == operand2 {
+			p.memory[dstIdx] = 1
+		}
+	default:
+		return noJump, fmt.Errorf("%w: opcode=%d", errInvalidOpCode, op)
+	}
+	return noJump, nil
 }
 
 func (p *Program) Output() []int {
 	return p.output
 }
 
-func read2In1Out(programCounter int, input []int, addressingModes []addressingMode) (operand1, operand2, op int) {
-	operand1, operand2, output := input[programCounter+1], input[programCounter+2], input[programCounter+3]
-	if len(addressingModes) == 0 || addressingModes[0] == absoluteAddress {
-		operand1 = input[operand1]
-	}
-	if len(addressingModes) <= 1 || addressingModes[1] == absoluteAddress {
-		operand2 = input[operand2]
-	}
-	return operand1, operand2, output
-}
-
-// parseOpCodeAddressMode parses the opCode and the addressing modes from the input.
-// The opCode is a two-digit number based only on the ones and tens digit of the value.
-// The addressing mode is series of digits starting from the hundreths place.
-func parseOpCodeAddressMode(value int) (opCode, []addressingMode, error) {
-	opCodeValue := value
-	if value >= 100 {
-		opCodeValue %= 100
-	}
-
-	if ok := isValid[opCode(opCodeValue)]; !ok {
-		return opCodeUnknown, []addressingMode{}, fmt.Errorf("%w: %d", errInvalidOpCode, opCodeValue)
-	}
-	return opCode(opCodeValue), parseAddressingModes(value / 100), nil
-}
-
-// parseAddressingModes converts the input integer into a list of its digits,
-// then for each digit, converts it to the corresponding addressingMode.
-func parseAddressingModes(modes int) []addressingMode {
-	digits := intToDigits(modes)
-	addressModes := make([]addressingMode, 0, len(digits))
-	for _, digit := range digits {
-		addressMode := addressingMode(digit)
-		if addressMode != absoluteAddress && addressMode != immediateValue {
-			return []addressingMode{}
-		}
-		addressModes = append(addressModes, addressMode)
-	}
-	return addressModes
-
-}
-
-// intToDigits splits the input integer into a slice of its digits where each digit is an int.
-// The least signigicant digit is at index 0 of the output.
-func intToDigits(value int) []int {
-	digits := []int{}
-	n := value
-	for n > 0 {
-		r := n % 10
-		digits = append(digits, r)
-		n /= 10
-	}
-	return digits
+func (p *Program) Memory() []int {
+	return p.memory
 }

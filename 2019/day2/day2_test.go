@@ -25,11 +25,11 @@ func TestDay2Intcode(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			p := intcode.NewProgram(tc.input)
-			solution, err := p.Run(-1)
-			if err != nil {
+			if err := p.Run(-1); err != nil {
 				t.Fatal(err)
 			}
-			if want, got := tc.want, solution; want != got {
+
+			if want, got := tc.want, p.Memory()[0]; want != got {
 				t.Errorf("want: %d, got: %d", want, got)
 			}
 
