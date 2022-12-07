@@ -3,6 +3,7 @@ package day7
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -18,6 +19,42 @@ func part1() int {
 		fmt.Println(err)
 	}
 	return sumDirSizes(fs)
+}
+
+func part2() int {
+	lines, err := inputToLines()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fs, err := createFsFromCommands(lines)
+	if err != nil {
+		fmt.Println(err)
+	}
+	dirSizes := map[string]int{}
+	fs.sumDirSizes(fs.root, dirSizes)
+
+	const (
+		totalSpace  = 70000000
+		neededSpace = 30000000
+	)
+	rootSize, ok := dirSizes[rootDirName]
+	if !ok {
+		fmt.Println("err no root size")
+	}
+
+	currentUnusedSpace := totalSpace - rootSize
+	desiredSpace := neededSpace - currentUnusedSpace
+
+	minSize := math.MaxInt32
+	for _, currDirSize := range dirSizes {
+		if currDirSize < desiredSpace {
+			continue
+		}
+		if currDirSize < minSize {
+			minSize = currDirSize
+		}
+	}
+	return minSize
 }
 
 func sumDirSizes(fs *filesystem) int {

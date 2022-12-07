@@ -10,6 +10,12 @@ func TestPart1(t *testing.T) {
 	}
 }
 
+func TestPart2(t *testing.T) {
+	if want, got := 5974547, part2(); want != got {
+		t.Errorf("want: %d, got: %d", want, got)
+	}
+}
+
 func TestCreateFS(t *testing.T) {
 	testCases := []struct {
 		name       string
