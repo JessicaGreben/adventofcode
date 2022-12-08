@@ -13,6 +13,11 @@ func part1() int {
 	return findVisible(grid)
 }
 
+func part2() int {
+	grid := inputGrid()
+	return bestScenicScore(grid)
+}
+
 type tree struct {
 	height  int
 	visible bool
@@ -73,24 +78,24 @@ func isEdge(r, c int, grid [][]tree) bool {
 func rowShorter(r, c int, grid [][]tree) bool {
 	curr := grid[r][c].height
 
-	lShorter := true
+	leftShorter := true
 	for i := 0; i < c; i++ {
 		left := grid[r][i]
 		if left.height >= curr {
-			lShorter = false
+			leftShorter = false
 			break
 		}
 	}
-	rShorter := true
+	rightShorter := true
 	for i := c + 1; i < len(grid[r]); i++ {
 		right := grid[r][i]
 		if right.height >= curr {
-			rShorter = false
+			rightShorter = false
 			break
 		}
 	}
 
-	return lShorter || rShorter
+	return leftShorter || rightShorter
 }
 
 func colShorter(r, c int, grid [][]tree) bool {
@@ -114,4 +119,69 @@ func colShorter(r, c int, grid [][]tree) bool {
 	}
 
 	return uShorter || dShorter
+}
+
+func bestScenicScore(grid [][]tree) int {
+	bestScore := 0
+	for r := range grid {
+		for c := range grid[r] {
+			bestScore = max(bestScore,
+				rowScore(r, c, grid)*colScore(r, c, grid),
+			)
+		}
+	}
+	return bestScore
+}
+
+func max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
+
+func rowScore(r, c int, grid [][]tree) int {
+	curr := grid[r][c].height
+
+	left := 0
+	for i := c - 1; i >= 0; i-- {
+		left++
+		left := grid[r][i].height
+		if left >= curr {
+			break
+		}
+	}
+	right := 0
+	for i := c + 1; i < len(grid[r]); i++ {
+		right++
+		right := grid[r][i].height
+		if right >= curr {
+			break
+		}
+	}
+
+	return left * right
+}
+
+func colScore(r, c int, grid [][]tree) int {
+	curr := grid[r][c].height
+
+	top := 0
+	for i := r - 1; i >= 0; i-- {
+		top++
+		up := grid[i][c]
+		if up.height >= curr {
+			break
+		}
+	}
+	bottom := 0
+	for i := r + 1; i < len(grid); i++ {
+		bottom++
+		down := grid[i][c]
+		if down.height >= curr {
+			break
+		}
+	}
+
+	return top * bottom
 }
