@@ -44,32 +44,37 @@ func parseInput() []move {
 
 func countTailPositions(moves []move) int {
 	tailPositions := map[position]bool{}
-	head, tail := &position{}, &position{}
 
+	head, tail := &position{}, &position{}
+	prevHead := &position{head.r, head.c}
 	for _, move := range moves {
 		switch move.direction {
 		case "R":
 			for i := 0; i < move.amount; i++ {
 				head.c++
-				updateTail(head, tail)
+				updateTail(prevHead, head, tail)
+				prevHead = &position{head.r, head.c}
 				tailPositions[position{tail.r, tail.c}] = true
 			}
 		case "L":
 			for i := 0; i < move.amount; i++ {
 				head.c--
-				updateTail(head, tail)
+				updateTail(prevHead, head, tail)
+				prevHead = &position{head.r, head.c}
 				tailPositions[position{tail.r, tail.c}] = true
 			}
 		case "U":
 			for i := 0; i < move.amount; i++ {
 				head.r++
-				updateTail(head, tail)
+				updateTail(prevHead, head, tail)
+				prevHead = &position{head.r, head.c}
 				tailPositions[position{tail.r, tail.c}] = true
 			}
 		case "D":
 			for i := 0; i < move.amount; i++ {
 				head.r--
-				updateTail(head, tail)
+				updateTail(prevHead, head, tail)
+				prevHead = &position{head.r, head.c}
 				tailPositions[position{tail.r, tail.c}] = true
 			}
 		}
@@ -78,11 +83,11 @@ func countTailPositions(moves []move) int {
 	return len(tailPositions)
 }
 
-func updateTail(head, tail *position) {
+func updateTail(prevHead, head, tail *position) {
 	if tail.adjacent(head) {
 		return
 	}
-	tail.moveNextTo(head)
+	tail.set(prevHead)
 }
 
 type position struct {
@@ -90,8 +95,8 @@ type position struct {
 }
 
 // two positions are adjacent if either:
-//   - the head and tail are at the same location or
-//   - the head and tail are next to each other
+//   - they are at the same location or
+//   - they are next to each other, i.e only 1 row/column away
 func (p *position) adjacent(p2 *position) bool {
 	diffR, diffC := abs(p.r-p2.r), abs(p.c-p2.c)
 	return (diffR == 0 || diffR == 1) && (diffC == 0 || diffC == 1)
@@ -104,42 +109,7 @@ func abs(x int) int {
 	return x
 }
 
-func (p *position) sameRowOrCol(p2 *position) bool {
-	return p.r == p2.r || p.c == p2.c
-}
-
-func (p *position) moveNextTo(p2 *position) {
-	if p.sameRowOrCol(p2) { // move rol or col
-		switch {
-		case p.r == p2.r:
-			if p.c > p2.c+1 {
-				p.c = p2.c + 1
-			}
-			if p.c < p2.c-1 {
-				p.c = p2.c - 1
-			}
-		case p.c == p2.c:
-			if p.r > p2.r+1 {
-				p.r = p2.r + 1
-			}
-			if p.r < p2.r-1 {
-				p.r = p2.r - 1
-			}
-		default:
-			fmt.Println("err row or col should be the same", p, p2)
-		}
-	} else { // move diagonal
-		switch {
-		case p.c > p2.c && p.r > p2.r: // right/up
-			p.r, p.c = p.r-1, p.c-1
-		case p.c < p2.c && p.r < p2.r: // left/down
-			p.r, p.c = p.r+1, p.c+1
-		case p.c < p2.c && p.r > p2.r: // left/up
-			p.r, p.c = p.r-1, p.c+1
-		case p.c > p2.c && p.r < p2.r: // right/down
-			p.r, p.c = p.r+1, p.c-1
-		default:
-			fmt.Println("err diagnoal invalid condition", p, p2)
-		}
-	}
+func (p *position) set(p2 *position) {
+	p.r = p2.r
+	p.c = p2.c
 }

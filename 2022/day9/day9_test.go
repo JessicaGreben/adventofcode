@@ -28,10 +28,10 @@ func TestCountTailPositions(t *testing.T) {
 
 func TestDiagonalMove(t *testing.T) {
 	testCases := []struct {
-		name       string
-		head, tail *position
-		row, col   int
-		same       bool
+		name             string
+		prev, head, tail *position
+		row, col         int
+		same             bool
 	}{
 		{
 			/*
@@ -43,7 +43,7 @@ func TestDiagonalMove(t *testing.T) {
 				0 s.....
 			*/
 			"1",
-			&position{5, 2}, &position{4, 4},
+			&position{5, 3}, &position{5, 2}, &position{4, 4},
 			5, 3,
 			false,
 		},
@@ -57,7 +57,7 @@ func TestDiagonalMove(t *testing.T) {
 				0 s.....
 			*/
 			"2",
-			&position{5, 3}, &position{4, 1},
+			&position{5, 2}, &position{5, 3}, &position{4, 1},
 			5, 2,
 			false,
 		},
@@ -71,7 +71,7 @@ func TestDiagonalMove(t *testing.T) {
 				0 s.....
 			*/
 			"3",
-			&position{3, 3}, &position{4, 1},
+			&position{3, 2}, &position{3, 3}, &position{4, 1},
 			3, 2,
 			false,
 		},
@@ -85,22 +85,25 @@ func TestDiagonalMove(t *testing.T) {
 				0 s.....
 			*/
 			"4",
-			&position{3, 2}, &position{4, 4},
+			&position{3, 3}, &position{3, 2}, &position{4, 4},
 			3, 3,
 			false,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if want, got := tc.same, tc.tail.sameRowOrCol(tc.head); want != got {
+			if want, got := tc.same, tc.tail.adjacent(tc.head); want != got {
 				t.Errorf("same want: %v, got: %v", want, got)
 			}
-			tc.tail.moveNextTo(tc.head)
+			updateTail(tc.prev, tc.head, tc.tail)
 			if want, got := tc.row, tc.tail.r; want != got {
 				t.Errorf("row want: %v, got: %v", want, got)
 			}
 			if want, got := tc.col, tc.tail.c; want != got {
 				t.Errorf("col want: %v, got: %v", want, got)
+			}
+			if want, got := tc.same, tc.tail.adjacent(tc.head); want == got {
+				t.Errorf("same want: %v, got: %v", want, got)
 			}
 		})
 	}
