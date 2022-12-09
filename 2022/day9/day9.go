@@ -10,7 +10,7 @@ import (
 
 func part1() int {
 	moves := parseInput()
-	return countTailPositions(moves)
+	return countTailPoints(moves)
 }
 
 type move struct {
@@ -42,64 +42,58 @@ func parseInput() []move {
 	return out
 }
 
-func countTailPositions(moves []move) int {
-	tailPositions := map[position]bool{}
+func countTailPoints(moves []move) int {
+	tailPoints := map[point]bool{}
 
-	head, tail := &position{}, &position{}
-	prevHead := &position{head.r, head.c}
+	update := func(p, h, t *point, amount int, moveHeadFn func(*point)) *point {
+		for i := 0; i < amount; i++ {
+			moveHeadFn(h)
+			updateTail(p, h, t)
+			tailPoints[point{t.r, t.c}] = true
+			p = &point{h.r, h.c}
+		}
+		return p
+	}
+
+	head, tail := &point{}, &point{}
+	prevHead := &point{head.r, head.c}
 	for _, move := range moves {
 		switch move.direction {
 		case "R":
-			for i := 0; i < move.amount; i++ {
-				head.c++
-				updateTail(prevHead, head, tail)
-				prevHead = &position{head.r, head.c}
-				tailPositions[position{tail.r, tail.c}] = true
-			}
+			prevHead = update(prevHead, head, tail, move.amount, func(h *point) { h.c++ })
 		case "L":
-			for i := 0; i < move.amount; i++ {
-				head.c--
-				updateTail(prevHead, head, tail)
-				prevHead = &position{head.r, head.c}
-				tailPositions[position{tail.r, tail.c}] = true
-			}
+			prevHead = update(prevHead, head, tail, move.amount, func(h *point) { h.c-- })
 		case "U":
-			for i := 0; i < move.amount; i++ {
-				head.r++
-				updateTail(prevHead, head, tail)
-				prevHead = &position{head.r, head.c}
-				tailPositions[position{tail.r, tail.c}] = true
-			}
+			prevHead = update(prevHead, head, tail, move.amount, func(h *point) { h.r++ })
 		case "D":
-			for i := 0; i < move.amount; i++ {
-				head.r--
-				updateTail(prevHead, head, tail)
-				prevHead = &position{head.r, head.c}
-				tailPositions[position{tail.r, tail.c}] = true
-			}
+			prevHead = update(prevHead, head, tail, move.amount, func(h *point) { h.r-- })
 		}
 	}
 
-	return len(tailPositions)
+	return len(tailPoints)
 }
 
-func updateTail(prevHead, head, tail *position) {
+func updateTail(prevHead, head, tail *point) {
 	if tail.adjacent(head) {
 		return
 	}
-	tail.set(prevHead)
+	tail.set(prevHead.r, prevHead.c)
 }
 
-type position struct {
+type point struct {
 	r, c int
 }
 
-// two positions are adjacent if either:
+// two points are adjacent if either:
 //   - they are at the same location or
 //   - they are next to each other, i.e only 1 row/column away
-func (p *position) adjacent(p2 *position) bool {
+func (p *point) adjacent(p2 *point) bool {
 	diffR, diffC := abs(p.r-p2.r), abs(p.c-p2.c)
 	return (diffR == 0 || diffR == 1) && (diffC == 0 || diffC == 1)
+}
+
+func (p *point) set(r, c int) {
+	p.r, p.c = r, c
 }
 
 func abs(x int) int {
@@ -107,9 +101,4 @@ func abs(x int) int {
 		return -x
 	}
 	return x
-}
-
-func (p *position) set(p2 *position) {
-	p.r = p2.r
-	p.c = p2.c
 }

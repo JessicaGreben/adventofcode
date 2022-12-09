@@ -10,7 +10,7 @@ func TestPart1(t *testing.T) {
 	}
 }
 
-func TestCountTailPositions(t *testing.T) {
+func TestCountTailPoints(t *testing.T) {
 	moves := []move{
 		{"R", 4},
 		{"U", 4},
@@ -21,7 +21,7 @@ func TestCountTailPositions(t *testing.T) {
 		{"L", 5},
 		{"R", 2},
 	}
-	if want, got := 13, countTailPositions(moves); want != got {
+	if want, got := 13, countTailPoints(moves); want != got {
 		t.Errorf("want %v, got %v", want, got)
 	}
 }
@@ -29,7 +29,7 @@ func TestCountTailPositions(t *testing.T) {
 func TestDiagonalMove(t *testing.T) {
 	testCases := []struct {
 		name             string
-		prev, head, tail *position
+		prev, head, tail *point
 		row, col         int
 		same             bool
 	}{
@@ -43,7 +43,7 @@ func TestDiagonalMove(t *testing.T) {
 				0 s.....
 			*/
 			"1",
-			&position{5, 3}, &position{5, 2}, &position{4, 4},
+			&point{5, 3}, &point{5, 2}, &point{4, 4},
 			5, 3,
 			false,
 		},
@@ -57,7 +57,7 @@ func TestDiagonalMove(t *testing.T) {
 				0 s.....
 			*/
 			"2",
-			&position{5, 2}, &position{5, 3}, &position{4, 1},
+			&point{5, 2}, &point{5, 3}, &point{4, 1},
 			5, 2,
 			false,
 		},
@@ -71,7 +71,7 @@ func TestDiagonalMove(t *testing.T) {
 				0 s.....
 			*/
 			"3",
-			&position{3, 2}, &position{3, 3}, &position{4, 1},
+			&point{3, 2}, &point{3, 3}, &point{4, 1},
 			3, 2,
 			false,
 		},
@@ -85,7 +85,7 @@ func TestDiagonalMove(t *testing.T) {
 				0 s.....
 			*/
 			"4",
-			&position{3, 3}, &position{3, 2}, &position{4, 4},
+			&point{3, 3}, &point{3, 2}, &point{4, 4},
 			3, 3,
 			false,
 		},
