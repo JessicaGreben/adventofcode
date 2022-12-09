@@ -79,7 +79,7 @@ func countTailPositions(moves []move) int {
 }
 
 func updateTail(head, tail *position) {
-	if tail.touching(head) {
+	if tail.adjacent(head) {
 		return
 	}
 	tail.moveNextTo(head)
@@ -89,26 +89,19 @@ type position struct {
 	r, c int
 }
 
-// two positions are touching if either:
+// two positions are adjacent if either:
 //   - the head and tail are at the same location or
 //   - the head and tail are next to each other
-func (p *position) touching(p2 *position) bool {
-	return p.eq(p2) || p.isNextTo(p2)
+func (p *position) adjacent(p2 *position) bool {
+	diffR, diffC := abs(p.r-p2.r), abs(p.c-p2.c)
+	return (diffR == 0 || diffR == 1) && (diffC == 0 || diffC == 1)
 }
 
-func (p *position) eq(p2 *position) bool {
-	return p.r == p2.r && p.c == p2.c
-}
-
-func (p *position) isNextTo(p2 *position) bool {
-	return (p.r == p2.r && p.c == p2.c+1) || // right: row is the same, col +1
-		(p.r == p2.r && p.c == p2.c-1) || // left: row is the same, col -1
-		(p.r == p2.r+1 && p.c == p2.c) || // up: col is the same, row +1
-		(p.r == p2.r-1 && p.c == p2.c) || // down: col is the same, row -1
-		(p.r == p2.r+1 && p.c == p2.c+1) || // diagonal up/right: both differ by +1
-		(p.r == p2.r-1 && p.c == p2.c-1) || // diagonal down/left: both differ by -1
-		(p.r == p2.r+1 && p.c == p2.c-1) || // diagonal down/right: row+1, col-1
-		(p.r == p2.r-1 && p.c == p2.c+1) // diagonal up/left: row-1, col+1
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 func (p *position) sameRowOrCol(p2 *position) bool {
