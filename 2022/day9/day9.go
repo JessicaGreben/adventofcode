@@ -44,29 +44,30 @@ func parseInput() []move {
 
 func countTailPoints(moves []move) int {
 	tailPoints := map[point]bool{}
-
-	update := func(p, h, t *point, amount int, moveHeadFn func(*point)) *point {
-		for i := 0; i < amount; i++ {
-			moveHeadFn(h)
-			updateTail(p, h, t)
-			tailPoints[point{t.r, t.c}] = true
-			p = &point{h.r, h.c}
-		}
-		return p
-	}
-
 	head, tail := &point{}, &point{}
 	prevHead := &point{head.r, head.c}
+	var amount int
+
+	update := func(moveHeadFn func(*point)) {
+		for i := 0; i < amount; i++ {
+			moveHeadFn(head)
+			updateTail(prevHead, head, tail)
+			tailPoints[point{tail.r, tail.c}] = true
+			prevHead = &point{head.r, head.c}
+		}
+	}
+
 	for _, move := range moves {
+		amount = move.amount
 		switch move.direction {
 		case "R":
-			prevHead = update(prevHead, head, tail, move.amount, func(h *point) { h.c++ })
+			update(func(h *point) { h.c++ })
 		case "L":
-			prevHead = update(prevHead, head, tail, move.amount, func(h *point) { h.c-- })
+			update(func(h *point) { h.c-- })
 		case "U":
-			prevHead = update(prevHead, head, tail, move.amount, func(h *point) { h.r++ })
+			update(func(h *point) { h.r++ })
 		case "D":
-			prevHead = update(prevHead, head, tail, move.amount, func(h *point) { h.r-- })
+			update(func(h *point) { h.r-- })
 		}
 	}
 
