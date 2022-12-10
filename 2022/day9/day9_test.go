@@ -10,7 +10,13 @@ func TestPart1(t *testing.T) {
 	}
 }
 
-func TestCountTailPoints(t *testing.T) {
+func TestPart2(t *testing.T) {
+	if want, got := 2405, part2(); want != got {
+		t.Errorf("want: %d, got: %d", want, got)
+	}
+}
+
+func TestcountTailPointsPart1(t *testing.T) {
 	moves := []move{
 		{"R", 4},
 		{"U", 4},
@@ -21,7 +27,7 @@ func TestCountTailPoints(t *testing.T) {
 		{"L", 5},
 		{"R", 2},
 	}
-	if want, got := 13, countTailPoints(moves); want != got {
+	if want, got := 13, countTailPointsPart1(moves); want != got {
 		t.Errorf("want %v, got %v", want, got)
 	}
 }
@@ -95,7 +101,7 @@ func TestDiagonalMove(t *testing.T) {
 			if want, got := tc.same, tc.tail.adjacent(tc.head); want != got {
 				t.Errorf("same want: %v, got: %v", want, got)
 			}
-			updateTail(tc.prev, tc.head, tc.tail)
+			moveTail(tc.prev, tc.head, tc.tail)
 			if want, got := tc.row, tc.tail.r; want != got {
 				t.Errorf("row want: %v, got: %v", want, got)
 			}

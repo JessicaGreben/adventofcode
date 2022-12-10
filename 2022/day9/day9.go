@@ -10,7 +10,12 @@ import (
 
 func part1() int {
 	moves := parseInput()
-	return countTailPoints(moves)
+	return countTailPointsPart1(moves)
+}
+
+func part2() int {
+	moves := parseInput()
+	return countTailPointsPart2(moves)
 }
 
 type move struct {
@@ -42,16 +47,16 @@ func parseInput() []move {
 	return out
 }
 
-func countTailPoints(moves []move) int {
+func countTailPointsPart1(moves []move) int {
 	tailPoints := map[point]bool{}
 	head, tail := &point{}, &point{}
 	prevHead := &point{head.r, head.c}
 	var amount int
 
-	update := func(moveHeadFn func(*point)) {
+	doMove := func(moveHead func(*point)) {
 		for i := 0; i < amount; i++ {
-			moveHeadFn(head)
-			updateTail(prevHead, head, tail)
+			moveHead(head)
+			moveTail(prevHead, head, tail)
 			tailPoints[point{tail.r, tail.c}] = true
 			prevHead = &point{head.r, head.c}
 		}
@@ -61,24 +66,67 @@ func countTailPoints(moves []move) int {
 		amount = move.amount
 		switch move.direction {
 		case "R":
-			update(func(h *point) { h.c++ })
+			doMove(func(h *point) { h.c++ })
 		case "L":
-			update(func(h *point) { h.c-- })
+			doMove(func(h *point) { h.c-- })
 		case "U":
-			update(func(h *point) { h.r++ })
+			doMove(func(h *point) { h.r++ })
 		case "D":
-			update(func(h *point) { h.r-- })
+			doMove(func(h *point) { h.r-- })
 		}
 	}
 
 	return len(tailPoints)
 }
 
-func updateTail(prevHead, head, tail *point) {
+func countTailPointsPart2(moves []move) int {
+	tailPoints := map[point]bool{}
+
+	points := make([]*point, 10)
+	for i := range points {
+		points[i] = &point{}
+	}
+
+	for _, move := range moves {
+		for i := 0; i < move.amount; i++ {
+			for i, p := range points {
+				if i == 0 {
+					switch move.direction {
+					case "R":
+						points[i].c++
+					case "L":
+						points[i].c--
+					case "U":
+						points[i].r++
+					case "D":
+						points[i].r--
+					}
+				}
+				if i == len(points)-1 {
+					tailPoints[point{p.r, p.c}] = true
+					continue
+				}
+				next := points[i+1]
+				moveNext(p, next)
+			}
+		}
+	}
+
+	return len(tailPoints)
+}
+
+func moveTail(prevHead, head, tail *point) {
 	if tail.adjacent(head) {
 		return
 	}
 	tail.set(prevHead.r, prevHead.c)
+}
+
+func moveNext(head, tail *point) {
+	if tail.adjacent(head) {
+		return
+	}
+	tail.moveNextTo(head)
 }
 
 type point struct {
@@ -95,6 +143,46 @@ func (p *point) adjacent(p2 *point) bool {
 
 func (p *point) set(r, c int) {
 	p.r, p.c = r, c
+}
+
+func (p *point) sameRowOrCol(p2 *point) bool {
+	return p.r == p2.r || p.c == p2.c
+}
+
+func (p *point) moveNextTo(p2 *point) {
+	if p.sameRowOrCol(p2) { // move rol or col
+		switch {
+		case p.r == p2.r:
+			if p.c > p2.c+1 {
+				p.c = p2.c + 1
+			}
+			if p.c < p2.c-1 {
+				p.c = p2.c - 1
+			}
+		case p.c == p2.c:
+			if p.r > p2.r+1 {
+				p.r = p2.r + 1
+			}
+			if p.r < p2.r-1 {
+				p.r = p2.r - 1
+			}
+		default:
+			fmt.Println("err row or col should be the same", p, p2)
+		}
+	} else { // move diagonal
+		switch {
+		case p.c > p2.c && p.r > p2.r: // right/up
+			p.r, p.c = p.r-1, p.c-1
+		case p.c < p2.c && p.r < p2.r: // left/down
+			p.r, p.c = p.r+1, p.c+1
+		case p.c < p2.c && p.r > p2.r: // left/up
+			p.r, p.c = p.r-1, p.c+1
+		case p.c > p2.c && p.r < p2.r: // right/down
+			p.r, p.c = p.r+1, p.c-1
+		default:
+			fmt.Println("err diagnoal invalid condition", p, p2)
+		}
+	}
 }
 
 func abs(x int) int {
