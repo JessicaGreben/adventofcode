@@ -51,28 +51,22 @@ func countTailPointsPart1(moves []move) int {
 	tailPoints := map[point]bool{}
 	head, tail := &point{}, &point{}
 	prevHead := &point{head.r, head.c}
-	var amount int
 
-	doMove := func(moveHead func(*point)) {
-		for i := 0; i < amount; i++ {
-			moveHead(head)
+	for _, move := range moves {
+		for i := 0; i < move.amount; i++ {
+			switch move.direction {
+			case "R":
+				head.c++
+			case "L":
+				head.c--
+			case "U":
+				head.r++
+			case "D":
+				head.r--
+			}
 			moveTail(prevHead, head, tail)
 			tailPoints[point{tail.r, tail.c}] = true
 			prevHead = &point{head.r, head.c}
-		}
-	}
-
-	for _, move := range moves {
-		amount = move.amount
-		switch move.direction {
-		case "R":
-			doMove(func(h *point) { h.c++ })
-		case "L":
-			doMove(func(h *point) { h.c-- })
-		case "U":
-			doMove(func(h *point) { h.r++ })
-		case "D":
-			doMove(func(h *point) { h.r-- })
 		}
 	}
 
