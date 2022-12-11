@@ -10,7 +10,7 @@ import (
 
 func part1() int {
 	instructions := parseInput("input.txt")
-	return run(instructions)
+	return runPart1(instructions)
 }
 
 func part2() [][]string {
@@ -67,7 +67,7 @@ func parseInput(file string) []instruction {
 	return instructions
 }
 
-func run(instructions []instruction) int {
+func runPart1(instructions []instruction) int {
 	var signalStrength int
 	var registerX int = 1
 	var cycle int
@@ -89,10 +89,6 @@ func run(instructions []instruction) int {
 			// noop
 		}
 	}
-	cycle++
-	if cycle%20 == 0 {
-		signalStrength += (registerX * cycle)
-	}
 
 	return signalStrength
 }
@@ -107,7 +103,6 @@ func runPart2(instructions []instruction) [][]string {
 	}
 
 	finalsRow := make([][]string, 0, 6)
-
 	row := make([]string, 0, 40)
 	for _, currInstruction := range instructions {
 		for i := 0; i < cyclesPerInstruction[currInstruction.name]; i++ {
@@ -132,10 +127,6 @@ func runPart2(instructions []instruction) [][]string {
 			// noop
 		}
 	}
-	cycle++
-	if cycle%20 == 0 {
-		signalStrength += (registerX * cycle)
-	}
 
-	return append(finalsRow, row)
+	return finalsRow
 }
