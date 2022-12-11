@@ -25,13 +25,17 @@ func monkeyBusiness(input []monkey) int {
 }
 
 func chaseMonkeys(monkeys []monkey, divide, rounds int) []monkey {
+	mod := 1
+	for _, m := range monkeys {
+		mod *= m.test
+	}
 	var round int
 	for round < rounds {
 		for i, monkey := range monkeys {
 			throwItems := []throw{}
 			for _, item := range monkey.items {
 				monkeys[i].inspectionCount++
-				nw := newWorryLevel(item, monkey.op, monkey.opInt, divide)
+				nw := newWorryLevel(item, monkey.op, monkey.opInt, divide, mod)
 				t := throw{item: nw, to: monkey.testFalse}
 				if t.item%monkey.test == 0 {
 					t.to = monkey.testTrue
@@ -49,7 +53,7 @@ func chaseMonkeys(monkeys []monkey, divide, rounds int) []monkey {
 	return monkeys
 }
 
-func newWorryLevel(originalWorry int, op string, operand, divide int) int {
+func newWorryLevel(originalWorry int, op string, operand, divide, mod int) int {
 	var newWorry int
 	if operand == -1 {
 		operand = originalWorry
@@ -61,6 +65,10 @@ func newWorryLevel(originalWorry int, op string, operand, divide int) int {
 		newWorry = originalWorry * operand
 	default:
 		fmt.Println("not a valid op")
+	}
+	if divide == 1 {
+		// handles overflow
+		return newWorry % mod
 	}
 	return newWorry / divide
 }
