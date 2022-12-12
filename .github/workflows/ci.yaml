@@ -2,9 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   test:
@@ -16,6 +18,17 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
-
+    - name: Install goimports
+      run: go get golang.org/x/tools/cmd/goimports@v0.4.0
+    - name: run gofmt
+      run: go fmt -d $(find . -name "*.go") 
+    - name: run go vet
+      run: go vet ./...
+    - name: run goimports
+      run: goimports -d -local "github.com/jessicagreben/adventofcode" $(find . -name "*.go") 
+    - name: run staticcheck
+      uses: dominikh/staticcheck-action@v1.2.0
+      with:
+        install-go: false
     - name: Unit Tests
       run: go test ./...
