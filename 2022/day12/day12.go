@@ -2,8 +2,8 @@ package day6
 
 import (
 	"bufio"
+	"container/heap"
 	"fmt"
-	"math"
 	"os"
 )
 
@@ -38,31 +38,26 @@ type direction struct {
 	rowDiff, colDiff int
 }
 
-var bestSeen int
-
 func shortestPath(grid [][]byte) int {
 	var start, end point
 	for rowIdx := range grid {
 		for colIdx := range grid[rowIdx] {
 			curr := grid[rowIdx][colIdx]
 			if curr == 'S' {
-				start = point{rowIdx, colIdx}
+				start = point{rowIdx, colIdx, 0}
 				grid[rowIdx][colIdx] = 'a'
 			}
 			if curr == 'E' {
-				end = point{rowIdx, colIdx}
+				end = point{rowIdx, colIdx, -1}
 				grid[rowIdx][colIdx] = 'z'
 			}
 		}
 	}
-	// bestSeen = 0
-	// dfs(rowIdx, colIdx, 'S', grid, 0)
-	// return bestSeen
 	return bfs(start, end, grid)
 }
 
 type point struct {
-	r, c int
+	r, c, w int
 }
 
 func (p point) eq(p2 point) bool {
@@ -71,6 +66,7 @@ func (p point) eq(p2 point) bool {
 
 func bfs(start, end point, grid [][]byte) int {
 	seen := map[point]bool{}
+
 	distance := make([][]int, len(grid))
 	for i := range distance {
 		distance[i] = make([]int, len(grid[i]))
@@ -79,23 +75,25 @@ func bfs(start, end point, grid [][]byte) int {
 		}
 	}
 	distance[start.r][start.c] = 0
-	q := []point{start}
-	for len(q) > 0 {
-		curr := q[0]
-		q = q[1:]
-		seen[curr] = true
-		fmt.Println("pop", curr)
+
+	h := MinHeap{}
+	q := &h
+	heap.Push(q, start)
+
+	for q.Len() > 0 {
+		curr := q.Pop().(point)
+		seen[point{r: curr.r, c: curr.c}] = true
 
 		directions := []direction{
 			{1, 0}, {-1, 0}, {0, 1}, {0, -1},
 		}
 		for _, dir := range directions {
 			nextRow, nextCol := curr.r+dir.rowDiff, curr.c+dir.colDiff
-			nextPoint := point{nextRow, nextCol}
-			if seen[nextPoint] {
+			if !inBounds(nextRow, nextCol, grid) {
 				continue
 			}
-			if !inBounds(nextRow, nextCol, grid) {
+			nextPoint := point{r: nextRow, c: nextCol}
+			if seen[nextPoint] {
 				continue
 			}
 			currVal, nextVal := grid[curr.r][curr.c], grid[nextRow][nextCol]
@@ -110,41 +108,10 @@ func bfs(start, end point, grid [][]byte) int {
 			if nextPoint.eq(end) {
 				return distance[nextRow][nextCol]
 			}
-
-			q = append(q, point{nextRow, nextCol})
+			heap.Push(q, point{nextRow, nextCol, distance[nextRow][nextCol]})
 		}
 	}
 	return -1
-}
-
-func dfs(r, c int, prev byte, grid [][]byte, count int) int {
-	if !inBounds(r, c, grid) {
-		return math.MaxInt32
-	}
-	if count > bestSeen {
-		return math.MaxInt32
-	}
-	curr := grid[r][c]
-	if curr == 'V' {
-		return math.MaxInt32
-	}
-	if prev+1 < curr {
-		return math.MaxInt32
-	}
-	if curr == 'E' {
-		return count
-	}
-	directions := []direction{
-		{1, 0}, {-1, 0}, {0, 1}, {0, -1},
-	}
-
-	grid[r][c] = 'V'
-	for _, dir := range directions {
-		nextRow, nextCol := r+dir.rowDiff, c+dir.colDiff
-		bestSeen = min(bestSeen, dfs(nextRow, nextCol, curr, grid, count+1))
-	}
-	grid[r][c] = curr
-	return bestSeen
 }
 
 func inBounds(r, c int, grid [][]byte) bool {
@@ -152,9 +119,16 @@ func inBounds(r, c int, grid [][]byte) bool {
 		c >= 0 && c < len(grid[0])
 }
 
-func min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
+type MinHeap []point
+
+func (h MinHeap) Len() int           { return len(h) }
+func (h MinHeap) Less(i, j int) bool { return h[i].w < h[j].w }
+func (h MinHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+func (h *MinHeap) Push(x interface{}) {
+	*h = append(*h, x.(point))
+}
+func (h *MinHeap) Pop() interface{} {
+	x := (*h)[len(*h)-1]
+	*h = (*h)[0 : len(*h)-1]
+	return x
 }
