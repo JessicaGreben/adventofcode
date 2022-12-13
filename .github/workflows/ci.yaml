@@ -19,11 +19,11 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
-    - name: Install goimports
-      run: |
-        export PATH=$PATH:$(go env GOPATH)/bin
-        go get golang.org/x/tools/cmd/goimports@v0.4.0
-        goimports -d -local "github.com/jessicagreben/adventofcode" $(find . -name "*.go") 
+#     - name: Install goimports
+#       run: |
+#         export PATH=$PATH:$(go env GOPATH)/bin
+#         go get golang.org/x/tools/cmd/goimports@v0.4.0
+#         goimports -d -local "github.com/jessicagreben/adventofcode" $(find . -name "*.go") 
     - name: run gofmt
       run: gofmt -d $(find . -name "*.go") 
 #     - name: run go vet
