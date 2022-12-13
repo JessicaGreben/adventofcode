@@ -14,16 +14,17 @@ jobs:
     #container: golang:1.19-stretch
     steps:
     - uses: actions/checkout@v3
-
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
-#     - name: Install goimports
-#       run: |
-#         export PATH=$PATH:$(go env GOPATH)/bin
-#         go get golang.org/x/tools/cmd/goimports@v0.4.0
-#         goimports -d -local "github.com/jessicagreben/adventofcode" $(find . -name "*.go") 
+#       env:
+#         GOPATH: $HOME
+
+    - name: Install goimports
+      run: |
+        GOBIN=$PWD/bin go install golang.org/x/tools/cmd/goimports@v0.4.0
+        ./bin/goimports -d -local "github.com/jessicagreben/adventofcode" $(find . -name "*.go") 
     - name: run gofmt
       run: gofmt -d $(find . -name "*.go") 
 #     - name: run go vet
