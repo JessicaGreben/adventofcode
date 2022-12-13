@@ -11,7 +11,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: golang:1.19-stretch
+    #container: golang:1.19-stretch
     steps:
     - uses: actions/checkout@v3
 
