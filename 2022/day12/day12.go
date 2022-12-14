@@ -64,21 +64,31 @@ func (p point) eq(p2 point) bool {
 	return p.r == p2.r && p.c == p2.c
 }
 
-type path struct {
-	r, c, d int
+func showPathOnGrid(end point, distance [][]point, grid [][]byte) {
+	// Rebuild point starting from the end
+	for p := distance[end.r][end.c]; p.w != 0; p = distance[p.r][p.c] {
+		grid[p.r][p.c] -= 32 // Upper Case
+	}
+	// Print grid similar to input file
+	for _, r := range grid {
+		for _, b := range r {
+			fmt.Print(string(b))
+		}
+		fmt.Println()
+	}
 }
 
 func bfs(start, end point, grid [][]byte) int {
 	seen := map[point]bool{}
 
-	distance := make([][]path, len(grid))
+	distance := make([][]point, len(grid))
 	for i := range distance {
-		distance[i] = make([]path, len(grid[i]))
+		distance[i] = make([]point, len(grid[i]))
 		for j := 0; j < len(grid[i]); j++ {
-			distance[i][j] = path{-1, -1, -1}
+			distance[i][j] = point{-1, -1, -1}
 		}
 	}
-	distance[start.r][start.c] = path{-1, -1, 0}
+	distance[start.r][start.c] = point{-1, -1, 0}
 
 	h := MinHeap{}
 	q := &h
@@ -96,37 +106,20 @@ func bfs(start, end point, grid [][]byte) int {
 			if !inBounds(nextRow, nextCol, grid) {
 				continue
 			}
-			nextPoint := point{r: nextRow, c: nextCol}
-			if seen[nextPoint] {
-				continue
-			}
 			currVal, nextVal := grid[curr.r][curr.c], grid[nextRow][nextCol]
 			if nextVal > currVal+1 {
 				continue
 			}
-			newDistance := distance[curr.r][curr.c].d + 1
-			nextDistance := distance[nextRow][nextCol].d
+			newDistance := distance[curr.r][curr.c].w + 1
+			nextDistance := distance[nextRow][nextCol].w
 			if nextDistance == -1 || newDistance < nextDistance {
-				distance[nextRow][nextCol] = path{curr.r, curr.c, newDistance}
+				distance[nextRow][nextCol] = point{curr.r, curr.c, newDistance}
+				heap.Push(q, point{nextRow, nextCol, distance[nextRow][nextCol].w})
 			}
-			if nextPoint.eq(end) {
-				// Rebuild path starting from the end
-				for x := distance[nextRow][nextCol]; x.d != 0; x = distance[x.r][x.c] {
-					grid[x.r][x.c] -= 32 // Upper Case
-				}
-				// Print grid similar to input file
-				for _, r := range grid {
-					for _, b := range r {
-						fmt.Print(string(b))
-					}
-					fmt.Println()
-				}
-				return distance[nextRow][nextCol].d
-			}
-			heap.Push(q, point{nextRow, nextCol, distance[nextRow][nextCol].d})
 		}
 	}
-	return -1
+	showPathOnGrid(end, distance, grid)
+	return distance[end.r][end.c].w
 }
 
 func inBounds(r, c int, grid [][]byte) bool {
