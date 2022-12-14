@@ -64,17 +64,21 @@ func (p point) eq(p2 point) bool {
 	return p.r == p2.r && p.c == p2.c
 }
 
+type path struct {
+	r, c, d int
+}
+
 func bfs(start, end point, grid [][]byte) int {
 	seen := map[point]bool{}
 
-	distance := make([][]int, len(grid))
+	distance := make([][]path, len(grid))
 	for i := range distance {
-		distance[i] = make([]int, len(grid[i]))
+		distance[i] = make([]path, len(grid[i]))
 		for j := 0; j < len(grid[i]); j++ {
-			distance[i][j] = -1
+			distance[i][j] = path{-1, -1, -1}
 		}
 	}
-	distance[start.r][start.c] = 0
+	distance[start.r][start.c] = path{-1, -1, 0}
 
 	h := MinHeap{}
 	q := &h
@@ -100,15 +104,26 @@ func bfs(start, end point, grid [][]byte) int {
 			if nextVal > currVal+1 {
 				continue
 			}
-			newDistance := distance[curr.r][curr.c] + 1
-			nextDistance := distance[nextRow][nextCol]
+			newDistance := distance[curr.r][curr.c].d + 1
+			nextDistance := distance[nextRow][nextCol].d
 			if nextDistance == -1 || newDistance < nextDistance {
-				distance[nextRow][nextCol] = newDistance
+				distance[nextRow][nextCol] = path{curr.r, curr.c, newDistance}
 			}
 			if nextPoint.eq(end) {
-				return distance[nextRow][nextCol]
+				// Rebuild path starting from the end
+				for x := distance[nextRow][nextCol]; x.d != 0; x = distance[x.r][x.c] {
+					grid[x.r][x.c] -= 32 // Upper Case
+				}
+				// Print grid similar to input file
+				for _, r := range grid {
+					for _, b := range r {
+						fmt.Print(string(b))
+					}
+					fmt.Println()
+				}
+				return distance[nextRow][nextCol].d
 			}
-			heap.Push(q, point{nextRow, nextCol, distance[nextRow][nextCol]})
+			heap.Push(q, point{nextRow, nextCol, distance[nextRow][nextCol].d})
 		}
 	}
 	return -1
