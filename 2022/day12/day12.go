@@ -81,7 +81,7 @@ func bfs(start, end point, grid [][]byte) int {
 	heap.Push(q, start)
 
 	for q.Len() > 0 {
-		curr := q.Pop().(point)
+		curr := heap.Pop(q).(point)
 		seen[point{r: curr.r, c: curr.c}] = true
 
 		directions := []direction{
