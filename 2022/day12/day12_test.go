@@ -5,7 +5,7 @@ import (
 )
 
 func TestPart1(t *testing.T) {
-	if want, got := 644, part1(); want != got {
+	if want, got := 520, part1(); want != got {
 		t.Errorf("want: %d, got: %d", want, got)
 	}
 }

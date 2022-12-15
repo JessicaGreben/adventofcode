@@ -104,11 +104,11 @@ func bfs(start, end point, grid [][]byte) int {
 			nextDistance := distance[nextRow][nextCol]
 			if nextDistance == -1 || newDistance < nextDistance {
 				distance[nextRow][nextCol] = newDistance
+				heap.Push(q, point{nextRow, nextCol, distance[nextRow][nextCol]})
 			}
 			if nextPoint.eq(end) {
 				return distance[nextRow][nextCol]
 			}
-			heap.Push(q, point{nextRow, nextCol, distance[nextRow][nextCol]})
 		}
 	}
 	return -1
