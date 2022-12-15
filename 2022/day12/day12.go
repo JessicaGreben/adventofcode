@@ -4,12 +4,18 @@ import (
 	"bufio"
 	"container/heap"
 	"fmt"
+	"math"
 	"os"
 )
 
 func part1() int {
 	grid := parseInput("input.txt")
 	return shortestPath(grid)
+}
+
+func part2() int {
+	grid := parseInput("input.txt")
+	return shortestPath2(grid)
 }
 
 func parseInput(file string) [][]byte {
@@ -54,6 +60,36 @@ func shortestPath(grid [][]byte) int {
 		}
 	}
 	return bfs(start, end, grid)
+}
+
+func shortestPath2(grid [][]byte) int {
+	var start, end point
+	for rowIdx := range grid {
+		for colIdx := range grid[rowIdx] {
+			curr := grid[rowIdx][colIdx]
+			if curr == 'E' {
+				end = point{rowIdx, colIdx, -1}
+				grid[rowIdx][colIdx] = 'z'
+			}
+		}
+	}
+	shortest := math.MaxInt32
+	for rowIdx := range grid {
+		curr := grid[rowIdx][0]
+		if curr == 'S' {
+			grid[rowIdx][0] = 'a'
+		}
+		start = point{rowIdx, 0, 0}
+		shortest = min(shortest, bfs(start, end, grid))
+	}
+	return shortest
+}
+
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
 }
 
 type point struct {
