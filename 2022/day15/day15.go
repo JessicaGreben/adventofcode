@@ -62,9 +62,9 @@ func countNoBeacons(sensors []sensor, desiredY int) int {
 		if sensor.beacon.y == desiredY {
 			yRowBeaconLocations[sensor.beacon.x] = true
 		}
-		if y == desiredY {
-			yRowBeaconLocations[x] = true
-		}
+		// if y == desiredY {
+		// 	yRowBeaconLocations[x] = true
+		// }
 		yOffset := 0
 		for xOffset := d; xOffset >= 0; xOffset-- {
 			yUp, yDown := y+yOffset, y-yOffset
