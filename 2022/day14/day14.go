@@ -9,55 +9,21 @@ import (
 	"strings"
 )
 
-/*
-Part1
-Parse input:
-- create a point for each step in each path (line in the input)
-- add the point to a map
-- track if this is the max y boundary of the grid
-- return the map and maxY
-
-Process sand:
-- Store a count of sand processed
-- Sand continues to be produced until one goes out of bounds
-- For each piece of sand:
--- in a loop:
---- go down 1 position, or left/down, or right/down
---- check if the sand is out of bounds. If out of bounds then terminate and return sand count
---- if the sand is blocked then create a point for that x,y and add it to the map and incrememnt sand count
-*/
-
 type point struct {
 	x, y int
 }
 
 func part1() int {
-	pathPoints, minY := convertLines(getLines("input.txt"))
+	pathPoints, minY := convertLines(readLines("input.txt"))
 	return countSand(pathPoints, minY)
 }
 
-/*
-Part2
-Parse input:
-- create a point for each step in each path (line in the input)
-- add the point to a map
-- track if this is the max y boundary of the grid
-- return the map and maxY
-
-Process sand:
-- Store a count of sand processed
-- Sand continues to be produced until source is blocked; i.e. a point is in the map for the source
-- For each piece of sand:
--- in a loop:
---- go down 1 position, or left/down, or right/down
---- if the sand is at rest then create a point for that x,y and add it to the map and incrememnt sand count. "at rest" = sand movement is blocked by a rock or sand or the floor. Sand is blocked by the floor when its y position == maxY+1
-*/
 func part2() int {
-	pathPoints, minY := convertLines(getLines("input.txt"))
+	pathPoints, minY := convertLines(readLines("input.txt"))
 	return countSandPart2(pathPoints, minY)
 }
 
-func getLines(file string) []string {
+func readLines(file string) []string {
 	fd, err := os.Open(file)
 	if err != nil {
 		fmt.Println(err)
