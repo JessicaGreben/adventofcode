@@ -6,11 +6,10 @@ on:
     paths: '2019/**/test.go'
 
 jobs:
-  run_if:
-    if:  startsWith(github.head_ref, 'autopr/')
   approve-and-merge:
-    name: Approve and Merge
     runs-on: ubuntu-latest
+    if:  startsWith(github.head_ref, 'autopr/')
+    name: Approve and Merge
     steps:
     - name: Approve Pull Request
       run: gh pr review ${{ github.head_ref }} --approve
