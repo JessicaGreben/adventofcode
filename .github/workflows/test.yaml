@@ -9,10 +9,9 @@ env:
   GH_TOKEN: ${{ github.token }}
 
 jobs:
-  run_if:
-    if:  startsWith(github.head_ref, 'autopr/')
   approve-and-merge:
     name: Approve and Merge
+    if:  startsWith(github.head_ref, 'autopr/')
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
