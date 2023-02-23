@@ -5,6 +5,9 @@ on:
     branches: [ main ]
     paths: '2019/**/test.go'
 
+env:
+  GH_TOKEN: ${{ github.token }}
+
 jobs:
   run_if:
     if:  startsWith(github.head_ref, 'autopr/')
