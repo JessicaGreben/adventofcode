@@ -11,8 +11,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-const nums = "0123456789"
-
 func main() {
 	solution, err := readInput(doPart1)
 	if err != nil {
@@ -50,6 +48,8 @@ func readInput(fn func(string) (int, error)) (int, error) {
 	return sum, nil
 }
 
+const nums = "0123456789"
+
 func doPart1(line string) (int, error) {
 	var digit1, digit10 string
 
@@ -64,16 +64,13 @@ func doPart1(line string) (int, error) {
 		if digit10 != "" && digit1 != "" {
 			tensPlace, err := strconv.Atoi(digit10)
 			if err != nil {
-				fmt.Println("tens:", digit10)
 				return -1, err
 			}
 			onesPlace, err := strconv.Atoi(digit1)
 			if err != nil {
-				fmt.Println("one:", digit1)
 				return -1, err
 			}
-			num := (10 * tensPlace) + onesPlace
-			return num, nil
+			return (10 * tensPlace) + onesPlace, nil
 		}
 		if digit10 == "" {
 			i++
@@ -112,14 +109,15 @@ func doPart2(line string) (int, error) {
 	for k := range strNums {
 		firstIdx := strings.Index(line, k)
 		lastIndex := strings.LastIndex(line, k)
-		if firstIdx != -1 && firstIdx == lastIndex {
-			indexes = append(indexes, firstIdx)
-			idxToNums[firstIdx] = k
+
+		if firstIdx == -1 || lastIndex == -1 {
+			continue
 		}
 
-		if firstIdx != -1 && lastIndex != -1 && firstIdx != lastIndex {
-			indexes = append(indexes, firstIdx)
-			idxToNums[firstIdx] = k
+		indexes = append(indexes, firstIdx)
+		idxToNums[firstIdx] = k
+
+		if firstIdx != lastIndex {
 			indexes = append(indexes, lastIndex)
 			idxToNums[lastIndex] = k
 		}

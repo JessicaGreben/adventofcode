@@ -27,6 +27,14 @@ func TestDay01Part1(t *testing.T) {
 			}
 		})
 	}
+
+	sum, err := readInput(doPart1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want, got := 53080, sum; want != got {
+		t.Errorf("total sum want=%d, got=%d", want, got)
+	}
 }
 
 func TestDay01Part2(t *testing.T) {
@@ -61,5 +69,12 @@ func TestDay01Part2(t *testing.T) {
 	}
 	if want, got := 352, sum; want != got {
 		t.Errorf("sum want=%d, got=%d", want, got)
+	}
+	sum, err := readInput(doPart2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want, got := 53268, sum; want != got {
+		t.Errorf("total sum want=%d, got=%d", want, got)
 	}
 }
