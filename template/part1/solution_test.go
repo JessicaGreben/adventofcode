@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-func TestSolution(t *testing.T) {
+func TestSolutionPart1(t *testing.T) {
 	testCases := []struct {
 		name  string
 		input string
