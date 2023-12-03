@@ -32,7 +32,7 @@ func TestPart2(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if want, got := -1, out; want != got {
+		if want, got := 0, out; want != got {
 			t.Errorf("want=%d, got=%d", want, got)
 		}
 	})
@@ -42,7 +42,7 @@ func TestPart2(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if want, got := -1, out; want != got {
+		if want, got := 0, out; want != got {
 			t.Errorf("want=%d, got=%d", want, got)
 		}
 	})
