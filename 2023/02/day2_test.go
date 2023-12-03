@@ -69,7 +69,7 @@ func TestDay02Part2(t *testing.T) {
 		})
 	}
 
-	sum, err := readInput("input.txt", doPart2)
+	sum, err := readInput("input_test.txt", doPart2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func TestDay02Part2(t *testing.T) {
 		t.Errorf("total sum want=%d, got=%d", want, got)
 	}
 
-	sum, err = readInput("", doPart1)
+	sum, err = readInput("", doPart2)
 	if err != nil {
 		t.Fatal(err)
 	}
