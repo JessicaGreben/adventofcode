@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-func TestPart1(t *testing.T) {
+func TestSolution(t *testing.T) {
 	testCases := []struct {
 		name  string
 		input string
@@ -17,7 +17,7 @@ func TestPart1(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			out, err := part1ProcessLine(tc.input)
+			out, err := processLine(tc.input)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -28,7 +28,7 @@ func TestPart1(t *testing.T) {
 	}
 
 	t.Run("input_test", func(t *testing.T) {
-		out, err := part1("input_test.txt")
+		out, err := solution("../input_test.txt")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -38,7 +38,7 @@ func TestPart1(t *testing.T) {
 	})
 
 	t.Run("input", func(t *testing.T) {
-		out, err := part1("input.txt")
+		out, err := solution("../input.txt")
 		if err != nil {
 			t.Fatal(err)
 		}
