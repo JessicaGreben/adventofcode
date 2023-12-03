@@ -44,13 +44,12 @@ func doPart1(m [][]string) (int, error) {
 	var sum int
 	for r := range m {
 		for c := range m[r] {
-			curr := m[r][c]
-			if isSymbol(curr) {
-				neighborSum, _, err := getNeighboringNums(m, r, c)
+			if isSymbol(m[r][c]) {
+				neighborsSum, _, err := getNeighboringNums(m, r, c)
 				if err != nil {
 					return -1, err
 				}
-				sum += neighborSum
+				sum += neighborsSum
 			}
 		}
 	}

@@ -69,7 +69,7 @@ func TestGetNum(t *testing.T) {
 	}
 }
 
-func TestgetNeighboringNums(t *testing.T) {
+func TestGetNeighboringNums(t *testing.T) {
 	m, err := convertInputToMatrix("input_test.txt")
 	if err != nil {
 		t.Fatal(err)
@@ -97,7 +97,7 @@ func TestgetNeighboringNums(t *testing.T) {
 				t.Fatal(err)
 			}
 			if want, got := tc.wantNum, sum; want != got {
-				t.Fatalf("want=%d, got=%d", want, got)
+				t.Errorf("want=%d, got=%d", want, got)
 			}
 
 			if want, got := len(tc.wantNums), len(nums); want != got {
@@ -120,7 +120,7 @@ func TestDay02Part2(t *testing.T) {
 	}
 	for i := 0; i < len(m); i++ {
 		if want, got := len(m[0]), len(m[i]); want != got {
-			t.Errorf("input matrix rows are not the same len, want=%d, got=%d", want, got)
+			t.Fatalf("input matrix rows are not the same len, want=%d, got=%d", want, got)
 		}
 	}
 	solution, err := doPart2(m)
