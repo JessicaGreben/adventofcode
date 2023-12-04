@@ -54,9 +54,7 @@ func totalCardCount(cardToWinCount map[int]int) (map[int]int, error) {
 		totalCards[cardNum]++ // initialize the first card
 		nextCard := cardNum + 1
 		for i := 0; i < cardToWinCount[cardNum]; i++ {
-			for cardCount := 0; cardCount < totalCards[cardNum]; cardCount++ {
-				totalCards[nextCard]++
-			}
+			totalCards[nextCard] += totalCards[cardNum]
 			nextCard++
 		}
 	}
