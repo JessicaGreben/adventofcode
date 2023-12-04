@@ -48,12 +48,16 @@ func ForEachLine(file string, fn func(string) (int, error)) (map[int]int, error)
 	return cardToWinCount, nil
 }
 
-func totalCardCount(cardToWinCount map[int]int) (map[int]int, error) {
+func totalCardCount(cardMatchCount map[int]int) (map[int]int, error) {
 	totalCards := map[int]int{}
-	for cardNum := 1; cardNum <= len(cardToWinCount); cardNum++ {
-		totalCards[cardNum]++ // initialize the first card
+	// initialize each card to a count of 1
+	for i := 1; i <= len(cardMatchCount); i++ {
+		totalCards[i] = 1
+	}
+
+	for cardNum := 1; cardNum <= len(cardMatchCount); cardNum++ {
 		nextCard := cardNum + 1
-		for i := 0; i < cardToWinCount[cardNum]; i++ {
+		for i := 0; i < cardMatchCount[cardNum]; i++ {
 			totalCards[nextCard] += totalCards[cardNum]
 			nextCard++
 		}
