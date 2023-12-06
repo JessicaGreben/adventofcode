@@ -12,20 +12,11 @@ import (
 	"time"
 )
 
-func main() {
-	out, err := solution("../input_test.txt")
-	if err != nil {
-		fmt.Println("main err=", err)
-	}
-	fmt.Println("out=", out)
-}
-
 func solution(file string) (int64, error) {
 	g, err := ForEachLine(file)
 	if err != nil {
 		return -1, err
 	}
-	g.locationIntervals = make([]interval, 0, len(g.seedIntervals))
 
 	//res := sequential(g)
 	res := concurrent(g)
@@ -39,8 +30,8 @@ func concurrent(g *garden) int64 {
 	var minLocation int64 = math.MaxInt64
 	sem := make(chan int, 1000)
 
+	start := time.Now()
 	for i, seedInterval := range g.seedIntervals {
-		start := time.Now()
 		for i := seedInterval.start; i <= seedInterval.end; i++ {
 			sem <- 1
 			wg.Add(1)
@@ -108,13 +99,15 @@ func ForEachLine(file string) (*garden, error) {
 			}
 			g.seeds = seeds
 			g.seedIntervals = make([]interval, 0, len(seeds)/2)
-			var totalSeeds int64
+			// var totalSeeds int64
 			for i := 0; i < len(seeds)-1; i += 2 {
 				s, size := seeds[i], seeds[i+1]
-				iv := interval{start: s, end: s + size - 1, size: size}
+				iv := interval{start: s, end: s + size - 1}
 				g.seedIntervals = append(g.seedIntervals, iv)
-				totalSeeds += size
+				// totalSeeds += size
 			}
+			// fmt.Println("totalSeed=", totalSeeds)
+			g.locationIntervals = make([]interval, 0, len(g.seedIntervals))
 			continue
 		}
 		cat := g.getCategory(line)
@@ -171,19 +164,8 @@ const (
 	locationCategory    = "-location"
 )
 
-var categories = []string{
-	seedCategory,
-	soilCategory,
-	fertilizerCategory,
-	waterCategory,
-	lightCategory,
-	temperatureCategory,
-	humidityCategory,
-	locationCategory,
-}
-
 type interval struct {
-	start, end, size int64
+	start, end int64
 }
 
 type mapping struct {
