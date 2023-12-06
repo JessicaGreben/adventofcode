@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"math"
 	"os"
 	"strconv"
@@ -48,7 +47,6 @@ func ForEachLine(file string) (*garden, error) {
 			for _, s := range out[1:] {
 				sInt64, err := strconv.Atoi(s)
 				if err != nil {
-					fmt.Println("s")
 					return nil, err
 				}
 				seeds = append(seeds, int64(sInt64))
@@ -78,36 +76,28 @@ func ForEachLine(file string) (*garden, error) {
 func lineToMapping(line string) (mapping, error) {
 	x := strings.Split(line, " ")
 	if len(x) < 3 {
-		fmt.Println(x)
 		return mapping{}, nil
 	}
 	destStart, sourceStart, size := x[0], x[1], x[2]
 	d, err := strconv.Atoi(destStart)
 	if err != nil {
-		fmt.Println("4")
-
 		return mapping{}, err
 	}
 	s, err := strconv.Atoi(sourceStart)
 	if err != nil {
-		fmt.Println("5")
-
 		return mapping{}, err
 	}
 	sz, err := strconv.Atoi(size)
 	if err != nil {
-		fmt.Println("6	")
-
 		return mapping{}, err
 	}
 	return mapping{
-		// size:   s,
 		source: interval{start: int64(s), end: int64(s + sz - 1)},
 		dest:   interval{start: int64(d), end: int64(d + sz - 1)},
 	}, nil
 }
 
-var (
+const (
 	seedCategory        = "seeds:"
 	soilCategory        = "-soil"
 	fertilizerCategory  = "-fertilizer"
@@ -134,7 +124,6 @@ type interval struct {
 }
 
 type mapping struct {
-	//size   int
 	source interval
 	dest   interval
 }
@@ -143,13 +132,7 @@ func (m *mapping) findMappedNum(num int64) (int64, error) {
 	if num < m.source.start || num > m.source.end {
 		return -1, nil
 	}
-	// fmt.Println("num:", num)
-	// fmt.Printf("map=%#v\n", m)
-	//destStart + size
-
 	idx := num - m.source.start
-	// fmt.Println("idx=", idx)
-
 	return int64(m.dest.start + idx), nil
 }
 
@@ -189,7 +172,6 @@ func (g *garden) getCategory(line string) string {
 }
 
 func (g *garden) getLocation(num int64, category string) (location int64, err error) {
-	// fmt.Println("num:", num, ", cat=", category, "mappings:", g.mappings[category])
 	var nextNum int64 = 0
 
 	for _, m := range g.mappings[category] {
