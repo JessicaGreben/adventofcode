@@ -17,7 +17,7 @@ func TestSolutionPart2(t *testing.T) {
 			{46689866, 358105418071080},
 		}
 
-		if want, got := int64(-1), solution(races); want != got {
+		if want, got := int64(27340847), solution(races); want != got {
 			t.Errorf("want=%d, got=%d", want, got)
 		}
 	})
