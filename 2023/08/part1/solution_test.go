@@ -4,7 +4,7 @@ import "testing"
 
 func TestSolutionPart1(t *testing.T) {
 	t.Run("input_test", func(t *testing.T) {
-		out, err := solution("../input_test.txt")
+		out, err := solution("input_test.txt")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -14,7 +14,7 @@ func TestSolutionPart1(t *testing.T) {
 	})
 
 	t.Run("input", func(t *testing.T) {
-		out, err := solution("../input.txt")
+		out, err := solution("input.txt")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -26,7 +26,7 @@ func TestSolutionPart1(t *testing.T) {
 
 func TestSolutionParseInput(t *testing.T) {
 	t.Run("input_test", func(t *testing.T) {
-		p, n, err := ForEachLine("../input_test.txt")
+		p, n, err := ForEachLine("input_test.txt")
 		if err != nil {
 			t.Fatal(err)
 		}
