@@ -24,13 +24,5 @@ func parseInput(file string) []matrix {
 		}
 		nextMatrix.data = append(nextMatrix.data, row)
 	}
-	result = append(result, nextMatrix)
-	// for _, xx := range result {
-	// 	fmt.Println()
-	// 	for _, x := range xx.data {
-	// 		fmt.Println(x)
-	// 	}
-
-	// }
-	return result
+	return append(result, nextMatrix)
 }
