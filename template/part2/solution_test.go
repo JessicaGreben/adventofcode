@@ -16,6 +16,9 @@ func TestSolutionPart2(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+
+		t.Skip()
+
 		t.Run(tc.name, func(t *testing.T) {
 			t.Skip()
 			out, err := processLine(tc.input)
