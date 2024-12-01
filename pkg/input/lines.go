@@ -40,7 +40,7 @@ func (i *Input) All() iter.Seq[string] {
 }
 
 // ParseLineInt64 splits the line by the delimeter and ensures there are partCount items after its split.
-// Then each part is converted to an Int64 and returned in a slice.
+// Each part is converted to an Int64 and returned in a slice.
 // The items in the slice are in order that they are in the original line.
 // For example, if the line is this: "1 2 3" and delimeter is " ", then the output will be [1, 2, 3].
 func ParseLineInt64(line, delimeter string, partCount int) ([]int64, error) {
