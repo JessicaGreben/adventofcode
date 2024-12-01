@@ -1,61 +1,35 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"sort"
-	"strconv"
-	"strings"
+
+	"github.com/jessicagreben/adventofcode/pkg/input"
 )
 
 func solution(file string) (int64, error) {
-	leftIDs, rightIDs, err := processInput(file)
+	in, err := input.NewInput(file)
 	if err != nil {
 		return -1, err
 	}
+
+	leftIDs, rightIDs := []int{}, []int{}
+	for line := range in.All() {
+		lineParts, err := input.ParseLineInt64(line, "   ", 2)
+		if err != nil {
+			return -1, err
+		}
+		leftIDs = append(leftIDs, int(lineParts[0]))
+		rightIDs = append(rightIDs, int(lineParts[1]))
+	}
+
+	sort.Ints(leftIDs)
+	sort.Ints(rightIDs)
+
 	var sumDifference int
 	for i := range leftIDs {
 		sumDifference += abs(leftIDs[i] - rightIDs[i])
 	}
 	return int64(sumDifference), nil
-}
-
-func processInput(file string) ([]int, []int, error) {
-	fd, err := os.Open(file)
-	if err != nil {
-		return nil, nil, err
-	}
-	scanner := bufio.NewScanner(fd)
-	leftIDs, rightIDs := []int{}, []int{}
-	for scanner.Scan() {
-		line := scanner.Text()
-		IDs := strings.Split(line, "   ")
-		if len(IDs) != 2 {
-			return nil, nil, fmt.Errorf("wrong number of ID, want=2, got=%d, IDs=%v", len(IDs), IDs)
-		}
-		leftID, rightID := IDs[0], IDs[1]
-		leftIDInt, err := strconv.Atoi(leftID)
-		if err != nil {
-			return nil, nil, err
-		}
-		rightIDInt, err := strconv.Atoi(rightID)
-		if err != nil {
-			return nil, nil, err
-		}
-		leftIDs = append(leftIDs, leftIDInt)
-		rightIDs = append(rightIDs, rightIDInt)
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, nil, err
-	}
-
-	if len(leftIDs) != len(rightIDs) {
-		return nil, nil, fmt.Errorf("left and right input are not the same len, len(left)=%v, len(right)=%v", len(leftIDs), len(rightIDs))
-	}
-	sort.Ints(leftIDs)
-	sort.Ints(rightIDs)
-	return leftIDs, rightIDs, nil
 }
 
 func abs(x int) int {

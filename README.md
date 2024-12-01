@@ -12,10 +12,10 @@ https://adventofcode.com
 
 ## Setup
 
-To setup a solution for a new problem, copy the template directory:
+To setup a directory for a new problem, copy the template directory with this `make` command:
 
 ```
-mkdir <year>
-mkdir <year>/<day>
-cp -r template/* <year>/<day>
+$ make copy year=2023 day=01
 ```
+
+This creates a new directory at the path `<year>/<day>/<partX>` for part 1 and part 2 of the problem.

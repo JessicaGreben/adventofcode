@@ -1,55 +1,32 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
-	"strconv"
-	"strings"
+	"github.com/jessicagreben/adventofcode/pkg/input"
 )
 
 func solution(file string) (int64, error) {
-	leftIDs, rightIDsFrequency, err := processInput(file)
+	in, err := input.NewInput(file)
 	if err != nil {
 		return -1, err
 	}
+
+	leftIDs := []int64{}
+	rightIDsFrequency := map[int64]int64{}
+	for line := range in.All() {
+		lineParts, err := input.ParseLineInt64(line, "   ", 2)
+		if err != nil {
+			return -1, err
+		}
+
+		leftID, rightID := int(lineParts[0]), int(lineParts[1])
+		leftIDs = append(leftIDs, int64(leftID))
+		rightIDsFrequency[int64(rightID)]++
+	}
+
 	var similarityScore int64
 	for _, id := range leftIDs {
 		similarityScore += id * rightIDsFrequency[id]
 	}
 	return similarityScore, nil
-}
 
-func processInput(file string) ([]int64, map[int64]int64, error) {
-	fd, err := os.Open(file)
-	if err != nil {
-		return nil, nil, err
-	}
-	scanner := bufio.NewScanner(fd)
-
-	leftIDs := []int64{}
-	rightIDsFrequency := map[int64]int64{}
-	for scanner.Scan() {
-		line := scanner.Text()
-		IDs := strings.Split(line, "   ")
-		if len(IDs) != 2 {
-			return nil, nil, fmt.Errorf("wrong number of ids, want=2, got=%d, IDs=%v", len(IDs), IDs)
-		}
-		leftID, rightID := IDs[0], IDs[1]
-		leftIDInt, err := strconv.Atoi(leftID)
-		if err != nil {
-			return nil, nil, err
-		}
-		rightIDInt, err := strconv.Atoi(rightID)
-		if err != nil {
-			return nil, nil, err
-		}
-		leftIDs = append(leftIDs, int64(leftIDInt))
-		rightIDsFrequency[int64(rightIDInt)]++
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, nil, err
-	}
-
-	return leftIDs, rightIDsFrequency, nil
 }
