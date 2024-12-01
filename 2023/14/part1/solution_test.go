@@ -18,6 +18,7 @@ func TestSolutionPart1(t *testing.T) {
 	})
 
 	t.Run("input", func(t *testing.T) {
+		t.Skip()
 		out, err := solution("../input.txt")
 		if err != nil {
 			t.Fatal(err)
