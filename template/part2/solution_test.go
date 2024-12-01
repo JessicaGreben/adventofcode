@@ -21,7 +21,7 @@ func TestSolutionPart2(t *testing.T) {
 
 		t.Run(tc.name, func(t *testing.T) {
 			t.Skip()
-			out, err := processLine(tc.input)
+			out, err := solution(tc.input)
 			if err != nil {
 				t.Fatal(err)
 			}
