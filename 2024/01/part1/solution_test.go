@@ -18,7 +18,7 @@ func TestSolutionPart1(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if want, got := int64(0), out; want != got {
+		if want, got := int64(1603498), out; want != got {
 			t.Errorf("want=%d, got=%d", want, got)
 		}
 	})
