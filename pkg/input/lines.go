@@ -9,21 +9,22 @@ import (
 	"strings"
 )
 
-type Input struct {
+// FileInput can iterate over all the lines in a file.
+type FileInput struct {
 	scanner *bufio.Scanner
 }
 
-func NewInput(filepath string) (*Input, error) {
+func New(filepath string) (*FileInput, error) {
 	fd, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
 	}
-	return &Input{
+	return &FileInput{
 		scanner: bufio.NewScanner(fd),
 	}, nil
 }
 
-func (i *Input) All() iter.Seq[string] {
+func (i *FileInput) All() iter.Seq[string] {
 	return func(yield func(string) bool) {
 		defer func() {
 			if err := i.scanner.Err(); err != nil {

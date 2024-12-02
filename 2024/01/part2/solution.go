@@ -5,7 +5,7 @@ import (
 )
 
 func solution(file string) (int64, error) {
-	in, err := input.NewInput(file)
+	in, err := input.New(file)
 	if err != nil {
 		return -1, err
 	}

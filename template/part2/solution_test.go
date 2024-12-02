@@ -8,19 +8,11 @@ func TestSolutionPart2(t *testing.T) {
 		input string
 		want  int64
 	}{
-		{"1", "", -1},
-		{"2", "", -1},
-		{"3", "", -1},
-		{"4", "", -1},
-		{"5", "", -1},
+		{"1", "../input.txt", -1},
 	}
 
 	for _, tc := range testCases {
-
-		t.Skip()
-
 		t.Run(tc.name, func(t *testing.T) {
-			t.Skip()
 			out, err := solution(tc.input)
 			if err != nil {
 				t.Fatal(err)
@@ -32,23 +24,21 @@ func TestSolutionPart2(t *testing.T) {
 	}
 
 	t.Run("input_test", func(t *testing.T) {
-		t.Skip()
-		out, err := solution("../input_test.txt")
+		out, err := solution("../example_input.txt")
 		if err != nil {
 			t.Fatal(err)
 		}
-		if want, got := int64(0), out; want != got {
+		if want, got := int64(-1), out; want != got {
 			t.Errorf("want=%d, got=%d", want, got)
 		}
 	})
 
 	t.Run("input", func(t *testing.T) {
-		t.Skip()
 		out, err := solution("../input.txt")
 		if err != nil {
 			t.Fatal(err)
 		}
-		if want, got := int64(0), out; want != got {
+		if want, got := int64(-1), out; want != got {
 			t.Errorf("want=%d, got=%d", want, got)
 		}
 	})

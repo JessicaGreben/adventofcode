@@ -3,17 +3,17 @@ package main
 import (
 	"fmt"
 
-	"github.com/jessicagreben/adventofcode/pkg/input"
+	fileinput "github.com/jessicagreben/adventofcode/pkg/input"
 )
 
 func solution(file string) (int64, error) {
-	in, err := input.NewInput(file)
+	input, err := fileinput.New(file)
 	if err != nil {
 		return -1, err
 	}
 
-	for line := range in.All() {
-		linePartInts, err := processLine(line)
+	for line := range input.All() {
+		linePartInts, err := parseLine(line)
 		if err != nil {
 			return -1, err
 		}
@@ -23,6 +23,6 @@ func solution(file string) (int64, error) {
 	return -1, nil
 }
 
-func processLine(line string) ([]int64, error) {
-	return input.ParseLineInt64(line, " ", 2)
+func parseLine(line string) ([]int64, error) {
+	return fileinput.ParseLineInt64(line, " ", 2)
 }

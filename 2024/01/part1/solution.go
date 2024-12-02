@@ -3,18 +3,18 @@ package main
 import (
 	"sort"
 
-	"github.com/jessicagreben/adventofcode/pkg/input"
+	fileinput "github.com/jessicagreben/adventofcode/pkg/input"
 )
 
 func solution(file string) (int64, error) {
-	in, err := input.NewInput(file)
+	input, err := fileinput.New(file)
 	if err != nil {
 		return -1, err
 	}
 
 	leftIDs, rightIDs := []int{}, []int{}
-	for line := range in.All() {
-		lineParts, err := input.ParseLineInt64(line, "   ", 2)
+	for line := range input.All() {
+		lineParts, err := fileinput.ParseLineInt64(line, "   ", 2)
 		if err != nil {
 			return -1, err
 		}
