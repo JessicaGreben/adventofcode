@@ -13,11 +13,11 @@ func solution(file string) (int64, error) {
 	}
 
 	for line := range input.All() {
-		linePartInts, err := parseLine(line)
+		lineInts, err := parseLine(line)
 		if err != nil {
 			return -1, err
 		}
-		part1, part2 := linePartInts[0], linePartInts[1]
+		part1, part2 := lineInts[0], lineInts[1]
 		fmt.Println(part1, part2)
 	}
 	return -1, nil

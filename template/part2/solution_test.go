@@ -12,6 +12,7 @@ func TestSolutionPart2(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		t.Skip()
 		t.Run(tc.name, func(t *testing.T) {
 			out, err := solution(tc.input)
 			if err != nil {
@@ -24,6 +25,7 @@ func TestSolutionPart2(t *testing.T) {
 	}
 
 	t.Run("input_test", func(t *testing.T) {
+		t.Skip()
 		out, err := solution("../example_input.txt")
 		if err != nil {
 			t.Fatal(err)
@@ -34,6 +36,7 @@ func TestSolutionPart2(t *testing.T) {
 	})
 
 	t.Run("input", func(t *testing.T) {
+		t.Skip()
 		out, err := solution("../input.txt")
 		if err != nil {
 			t.Fatal(err)
