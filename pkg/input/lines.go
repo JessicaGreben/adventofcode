@@ -47,11 +47,12 @@ func (i *FileInput) All() iter.Seq[string] {
 func ParseLineInt64(line, delimeter string, partCount int) ([]int64, error) {
 	out := []int64{}
 	lineParts := strings.Split(line, delimeter)
+
 	if partCount != -1 && len(lineParts) != partCount {
 		return out, fmt.Errorf("wrong number of parts, want=%d, got=%d, parts=%v", partCount, len(lineParts), lineParts)
 	}
 
-	for i := range partCount {
+	for i := range lineParts {
 		part := lineParts[i]
 		partInt, err := strconv.Atoi(part)
 		if err != nil {
