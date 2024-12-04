@@ -19,7 +19,7 @@ func TestSolutionPart2(t *testing.T) {
 				t.Fatal(err)
 			}
 			if want, got := tc.want, out; want != got {
-				t.Errorf("want=%d, got=%d", want, got)
+				t.Errorf("want=%v, got=%v", want, got)
 			}
 		})
 	}
@@ -31,7 +31,7 @@ func TestSolutionPart2(t *testing.T) {
 			t.Fatal(err)
 		}
 		if want, got := int64(-1), out; want != got {
-			t.Errorf("want=%d, got=%d", want, got)
+			t.Errorf("want=%v, got=%v", want, got)
 		}
 	})
 
@@ -42,7 +42,7 @@ func TestSolutionPart2(t *testing.T) {
 			t.Fatal(err)
 		}
 		if want, got := int64(-1), out; want != got {
-			t.Errorf("want=%d, got=%d", want, got)
+			t.Errorf("want=%v, got=%v", want, got)
 		}
 	})
 }
