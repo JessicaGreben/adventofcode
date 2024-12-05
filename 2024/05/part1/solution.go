@@ -7,10 +7,6 @@ import (
 	fileinput "github.com/jessicagreben/adventofcode/pkg/input"
 )
 
-type edge struct {
-	from, to int64
-}
-
 func solution(file string) (int64, error) {
 	lines, err := fileinput.GetLines(file)
 	if err != nil {
