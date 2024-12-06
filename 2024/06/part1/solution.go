@@ -50,9 +50,6 @@ const (
 	visited = "X"
 )
 
-// can you cross a path you've already been
-// can you turn more than once
-// dont double count a path you have already crossed
 func traverse(m [][]string, r, c int, direction pos, count int64) (int64, error) {
 	if !inBounds(m, r, c) {
 		return count, nil
