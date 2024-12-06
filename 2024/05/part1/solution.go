@@ -50,7 +50,7 @@ Outer:
 				}
 
 				// make sure that each downstream item in the path doesn't need to come
-				// before the item  item we are adding to the queue.
+				// before the item getting added to the queue.
 				correctOrder := true
 				for i := nextPathIdx; i < len(path); i++ {
 					downstreamPathValue := path[i]
