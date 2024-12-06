@@ -29,11 +29,10 @@ func solution(file string) (int64, error) {
 		for c := range m[r] {
 			cp := copyMatrix(m)
 			curr := cp[r][c]
-			if curr == "." {
-				cp[r][c] = blocked
-			} else {
+			if curr != "." {
 				continue
 			}
+			cp[r][c] = blocked
 			cp[startRow][startCol] = "."
 			if traverse(cp, startRow, startCol, startDirection, map[seenKey]bool{}) {
 				result++
