@@ -54,6 +54,9 @@ func ParseLineInt64(line, delimeter string, partCount int) ([]int64, error) {
 
 	for i := range lineParts {
 		part := lineParts[i]
+		if part == "" {
+			continue
+		}
 		partInt, err := strconv.Atoi(part)
 		if err != nil {
 			return out, err
