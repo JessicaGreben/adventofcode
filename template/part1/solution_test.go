@@ -24,7 +24,7 @@ func TestSolutionPart1(t *testing.T) {
 		})
 	}
 
-	t.Run("input_test", func(t *testing.T) {
+	t.Run("example_input_test", func(t *testing.T) {
 		out, err := solution("../example_input.txt")
 		if err != nil {
 			t.Fatal(err)
