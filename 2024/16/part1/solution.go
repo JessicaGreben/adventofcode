@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
+	"github.com/jessicagreben/adventofcode/pkg/heap"
 	fileinput "github.com/jessicagreben/adventofcode/pkg/input"
 	"github.com/jessicagreben/adventofcode/pkg/matrix"
 )
@@ -25,6 +27,7 @@ func solution(file string) (int64, error) {
 		}
 	}
 
+	//return dijkstras(m, startRow, startCol, endRow, endCol)
 	return shortestPath(m, startRow, startCol, endRow, endCol)
 }
 
@@ -95,6 +98,43 @@ func shortestPath(m [][]string, row, col, endRow, endCol int) (int64, error) {
 			}
 			nextDistance := curr.distance + edge.weight
 			q = append(q, nodeDistancePair{matrix.Element{nextRow, nextCol}, nextDistance, dir})
+		}
+	}
+	return distances[endRow][endCol], nil
+}
+
+func dijkstras(m [][]string, row, col, endRow, endCol int) (int64, error) {
+	distances := make([][]int64, len(m))
+	for i := range distances {
+		distances[i] = make([]int64, len(m[0]))
+		for j := range distances[i] {
+			distances[i][j] = math.MaxInt64
+		}
+	}
+	n := nodeDistancePair{matrix.Element{row, col}, 0, east}
+	h := heap.NewMinHeap[nodeDistancePair](func(x, y nodeDistancePair) bool { return x.distance < y.distance })
+	h.Push(n)
+	distances[row][col] = 0
+	for h.Len() > 0 {
+		curr, err := h.Pop()
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+
+		if curr.distance > distances[curr.node.Row][curr.node.Col] {
+			continue
+		}
+		distances[curr.node.Row][curr.node.Col] = curr.distance
+
+		for dir, edge := range directions[curr.direction] {
+			nextRow, nextCol := curr.node.Row+edge.row, curr.node.Col+edge.col
+			if m[nextRow][nextCol] == "#" {
+				continue
+			}
+			nextDistance := curr.distance + edge.weight
+			n := nodeDistancePair{matrix.Element{nextRow, nextCol}, nextDistance, dir}
+			h.Push(n)
 		}
 	}
 	return distances[endRow][endCol], nil
