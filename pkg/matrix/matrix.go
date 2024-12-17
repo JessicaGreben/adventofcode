@@ -14,7 +14,7 @@ func InBounds[V string | int](m [][]V, r, c int) bool {
 	return r >= 0 && r < len(m) && c >= 0 && c < len(m[0])
 }
 
-func Print[V string | int](m [][]V) {
+func Print[V string | int | int64](m [][]V) {
 	fmt.Println()
 	for r := range m {
 		fmt.Println(m[r])
