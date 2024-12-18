@@ -31,21 +31,18 @@ func solution(file string, size, byteCount int) (int, int, error) {
 		}
 		x, y := lineInts[0], lineInts[1]
 		coordinates = append(coordinates, matrix.Element{int(y), int(x)})
+		m[y][x] = "#"
 	}
 
-	for i := range byteCount {
+	for i := len(coordinates) - 1; i >= 0; i-- {
 		curr := coordinates[i]
-		m[curr.Row][curr.Col] = "#"
-	}
-
-	for i := byteCount + 1; i < len(coordinates); i++ {
-		curr := coordinates[i]
-		m[curr.Row][curr.Col] = "#"
+		m[curr.Row][curr.Col] = "."
 		x, err := dijkstras(m)
 		if err != nil {
 			return -1, -1, err
 		}
-		if x == math.MaxInt64 {
+		if x != math.MaxInt64 {
+			curr = coordinates[i]
 			return curr.Row, curr.Col, nil
 		}
 	}
